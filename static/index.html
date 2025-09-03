@@ -20,6 +20,7 @@
                     <select id="fractal-type">
                         <option value="mandelbrot">Mandelbrot Set</option>
                         <option value="julia">Julia Set</option>
+                        <option value="lsystem">L-System Fractals</option>
                     </select>
                 </div>
 
@@ -68,6 +69,54 @@
                     </label>
                 </div>
 
+                <div class="control-group lsystem-controls" style="display: none;">
+                    <h3>L-System Parameters</h3>
+                    <label>
+                        Preset:
+                        <select id="lsystem-preset">
+                            <option value="tree">Tree</option>
+                            <option value="plant">Plant</option>
+                            <option value="fractal_plant">Fractal Plant</option>
+                            <option value="dragon">Dragon Curve</option>
+                            <option value="sierpinski">Sierpinski Triangle</option>
+                            <option value="koch">Koch Curve</option>
+                            <option value="custom">Custom L-System</option>
+                        </select>
+                    </label>
+                    <label>
+                        Iterations:
+                        <input type="number" id="lsystem-iterations" value="4" min="1" max="8">
+                    </label>
+                    <label>
+                        Angle:
+                        <input type="number" id="lsystem-angle" value="25" min="5" max="120" step="5">
+                    </label>
+                    
+                    <div class="custom-lsystem" id="custom-lsystem" style="display: none;">
+                        <h4>Custom L-System Editor</h4>
+                        <label>
+                            Axiom (Starting String):
+                            <input type="text" id="custom-axiom" value="F" placeholder="e.g., F or X">
+                        </label>
+                        <label>
+                            Rules (one per line):
+                            <textarea id="custom-rules" placeholder="F=F[+F]F[-F]F&#10;X=F+[[X]-X]-F[-FX]+X" rows="4"></textarea>
+                        </label>
+                        <div class="rule-help">
+                            <p><strong>L-System Commands:</strong></p>
+                            <ul>
+                                <li><code>F</code>, <code>G</code> - Draw forward</li>
+                                <li><code>+</code> - Turn left by angle</li>
+                                <li><code>-</code> - Turn right by angle</li>
+                                <li><code>[</code> - Save current position</li>
+                                <li><code>]</code> - Restore saved position</li>
+                                <li><code>X</code>, <code>Y</code> - Non-drawing symbols</li>
+                            </ul>
+                        </div>
+                        <button type="button" id="apply-custom-lsystem" class="custom-button">Apply Custom L-System</button>
+                    </div>
+                </div>
+
                 <div class="control-group">
                     <h3>Color Scheme</h3>
                     <select id="color-scheme">
@@ -90,6 +139,10 @@
                         <button class="preset-btn" data-preset="mandelbrot-zoom">Mandelbrot Detail</button>
                         <button class="preset-btn" data-preset="julia-spiral">Julia Spiral</button>
                         <button class="preset-btn" data-preset="julia-dendrite">Julia Dendrite</button>
+                        <button class="preset-btn" data-preset="lsystem-tree">L-Tree</button>
+                        <button class="preset-btn" data-preset="lsystem-dragon">L-Dragon</button>
+                        <button class="preset-btn" data-preset="lsystem-plant">L-Plant</button>
+                        <button class="preset-btn" data-preset="lsystem-koch">L-Koch</button>
                     </div>
                 </div>
             </div>

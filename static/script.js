@@ -32,17 +32,51 @@ class FractalGenerator {
             zoomValue.textContent = parseFloat(zoomSlider.value).toFixed(1);
         });
 
-        // Show/hide Julia controls
+        // Show/hide Julia and L-system controls
         const fractalType = document.getElementById('fractal-type');
         const juliaControls = document.querySelector('.julia-controls');
+        const lsystemControls = document.querySelector('.lsystem-controls');
         
         fractalType.addEventListener('change', () => {
+            juliaControls.style.display = 'none';
+            lsystemControls.style.display = 'none';
+            
             if (fractalType.value === 'julia') {
                 juliaControls.style.display = 'block';
-            } else {
-                juliaControls.style.display = 'none';
+            } else if (fractalType.value === 'lsystem') {
+                lsystemControls.style.display = 'block';
             }
         });
+
+        // Show/hide custom L-system editor
+        const lsystemPreset = document.getElementById('lsystem-preset');
+        const customLsystem = document.getElementById('custom-lsystem');
+        
+        lsystemPreset.addEventListener('change', () => {
+            if (lsystemPreset.value === 'custom') {
+                customLsystem.style.display = 'block';
+                this.loadCustomLsystemExample();
+            } else {
+                customLsystem.style.display = 'none';
+            }
+        });
+
+        // Apply custom L-system button
+        document.getElementById('apply-custom-lsystem').addEventListener('click', () => {
+            this.generateFractal();
+        });
+    }
+
+    loadCustomLsystemExample() {
+        // Load a simple tree example when custom is selected
+        const axiomInput = document.getElementById('custom-axiom');
+        const rulesTextarea = document.getElementById('custom-rules');
+        
+        if (axiomInput.value === 'F' && rulesTextarea.value === '') {
+            axiomInput.value = 'F';
+            rulesTextarea.value = 'F=F[+F]F[-F]F';
+            document.getElementById('lsystem-angle').value = 25;
+        }
     }
 
     setupEventListeners() {
@@ -112,7 +146,7 @@ class FractalGenerator {
         });
 
         // Auto-generate on control changes
-        const autoGenerateControls = ['fractal-type', 'color-scheme'];
+        const autoGenerateControls = ['fractal-type', 'color-scheme', 'lsystem-preset'];
         autoGenerateControls.forEach(id => {
             document.getElementById(id).addEventListener('change', () => {
                 this.generateFractal();
@@ -303,6 +337,46 @@ class FractalGenerator {
                 juliaCReal: 0,
                 juliaCImag: 1,
                 colorScheme: 'classic'
+            },
+            'lsystem-tree': {
+                fractalType: 'lsystem',
+                zoom: 1,
+                centerX: 0,
+                centerY: 0,
+                lsystemPreset: 'tree',
+                lsystemIterations: 5,
+                lsystemAngle: 25,
+                colorScheme: 'classic'
+            },
+            'lsystem-dragon': {
+                fractalType: 'lsystem',
+                zoom: 1,
+                centerX: 0,
+                centerY: 0,
+                lsystemPreset: 'dragon',
+                lsystemIterations: 10,
+                lsystemAngle: 90,
+                colorScheme: 'fire'
+            },
+            'lsystem-plant': {
+                fractalType: 'lsystem',
+                zoom: 1,
+                centerX: 0,
+                centerY: 0,
+                lsystemPreset: 'plant',
+                lsystemIterations: 4,
+                lsystemAngle: 25,
+                colorScheme: 'classic'
+            },
+            'lsystem-koch': {
+                fractalType: 'lsystem',
+                zoom: 1,
+                centerX: 0,
+                centerY: 0,
+                lsystemPreset: 'koch',
+                lsystemIterations: 4,
+                lsystemAngle: 90,
+                colorScheme: 'ocean'
             }
         };
 
@@ -328,9 +402,28 @@ class FractalGenerator {
             document.getElementById('julia-c-imag').value = config.juliaCImag;
         }
 
-        // Show/hide Julia controls
+        if (config.lsystemPreset !== undefined) {
+            document.getElementById('lsystem-preset').value = config.lsystemPreset;
+        }
+        if (config.lsystemIterations !== undefined) {
+            document.getElementById('lsystem-iterations').value = config.lsystemIterations;
+        }
+        if (config.lsystemAngle !== undefined) {
+            document.getElementById('lsystem-angle').value = config.lsystemAngle;
+        }
+
+        // Show/hide appropriate controls
         const juliaControls = document.querySelector('.julia-controls');
-        juliaControls.style.display = config.fractalType === 'julia' ? 'block' : 'none';
+        const lsystemControls = document.querySelector('.lsystem-controls');
+        
+        juliaControls.style.display = 'none';
+        lsystemControls.style.display = 'none';
+        
+        if (config.fractalType === 'julia') {
+            juliaControls.style.display = 'block';
+        } else if (config.fractalType === 'lsystem') {
+            lsystemControls.style.display = 'block';
+        }
 
         this.generateFractal();
     }
@@ -346,11 +439,40 @@ class FractalGenerator {
             fractal_type: document.getElementById('fractal-type').value,
             julia_c_real: parseFloat(document.getElementById('julia-c-real').value),
             julia_c_imag: parseFloat(document.getElementById('julia-c-imag').value),
-            color_scheme: document.getElementById('color-scheme').value
+            color_scheme: document.getElementById('color-scheme').value,
+            lsystem_preset: document.getElementById('lsystem-preset').value,
+            lsystem_iterations: parseInt(document.getElementById('lsystem-iterations').value),
+            lsystem_angle: parseFloat(document.getElementById('lsystem-angle').value),
+            custom_axiom: document.getElementById('custom-axiom').value,
+            custom_rules: document.getElementById('custom-rules').value
         };
     }
 
+    validateCustomLsystem() {
+        if (document.getElementById('fractal-type').value === 'lsystem' && 
+            document.getElementById('lsystem-preset').value === 'custom') {
+            const axiom = document.getElementById('custom-axiom').value.trim();
+            const rules = document.getElementById('custom-rules').value.trim();
+            
+            if (!axiom) {
+                alert('Please enter an axiom for your custom L-system.');
+                return false;
+            }
+            
+            if (!rules) {
+                alert('Please enter at least one rule for your custom L-system.');
+                return false;
+            }
+        }
+        return true;
+    }
+
     async generateFractal() {
+        // Validate custom L-system if selected
+        if (!this.validateCustomLsystem()) {
+            return;
+        }
+        
         const startTime = performance.now();
         
         // Don't show loading overlay during smooth zoom animations

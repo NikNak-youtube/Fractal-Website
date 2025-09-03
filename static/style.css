@@ -72,17 +72,20 @@ header p {
 }
 
 .control-group input,
-.control-group select {
+.control-group select,
+.control-group textarea {
     width: 100%;
     padding: 10px;
     border: 2px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
     transition: all 0.3s ease;
+    font-family: inherit;
 }
 
 .control-group input:focus,
-.control-group select:focus {
+.control-group select:focus,
+.control-group textarea:focus {
     border-color: #3498db;
     outline: none;
     box-shadow: 0 0 10px rgba(52, 152, 219, 0.3);
@@ -148,15 +151,16 @@ header p {
 }
 
 .preset-btn {
-    padding: 8px 12px;
+    padding: 8px 10px;
     border: 2px solid #e74c3c;
     background: white;
     color: #e74c3c;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     transition: all 0.3s ease;
+    text-align: center;
 }
 
 .preset-btn:hover {
@@ -215,6 +219,81 @@ header p {
 
 .zoom-indicator.active {
     opacity: 1;
+}
+
+/* Custom L-System Editor Styles */
+.custom-lsystem {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f0f8ff;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.custom-lsystem h4 {
+    margin-bottom: 15px;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.custom-lsystem textarea {
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.rule-help {
+    margin: 10px 0;
+    padding: 10px;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.rule-help p {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.rule-help ul {
+    margin: 0;
+    padding-left: 15px;
+    list-style-type: disc;
+}
+
+.rule-help li {
+    margin-bottom: 3px;
+    color: #34495e;
+}
+
+.rule-help code {
+    background: rgba(52, 152, 219, 0.2);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+}
+
+.custom-button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #27ae60, #229954);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.custom-button:hover {
+    background: linear-gradient(135deg, #229954, #1e8449);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
 }
 
 .loading {
