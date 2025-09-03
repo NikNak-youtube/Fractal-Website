@@ -179,6 +179,11 @@ header p {
     cursor: crosshair;
     max-width: 100%;
     height: auto;
+    transition: transform 0.1s ease-out;
+}
+
+#fractal-canvas:active {
+    transform: scale(0.99);
 }
 
 .canvas-info {
@@ -186,10 +191,30 @@ header p {
     text-align: center;
     color: #7f8c8d;
     font-size: 14px;
+    position: relative;
 }
 
 .canvas-info p {
     margin-bottom: 5px;
+}
+
+.zoom-indicator {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(52, 152, 219, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.zoom-indicator.active {
+    opacity: 1;
 }
 
 .loading {

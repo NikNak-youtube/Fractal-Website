@@ -4,6 +4,7 @@ class FractalGenerator {
         this.ctx = this.canvas.getContext('2d');
         this.loadingElement = document.getElementById('loading');
         this.generationTimeElement = document.getElementById('generation-time');
+        this.zoomIndicator = document.getElementById('zoom-indicator');
         
         this.isDragging = false;
         this.lastMousePos = { x: 0, y: 0 };
@@ -82,6 +83,10 @@ class FractalGenerator {
         this.canvas.addEventListener('mouseup', () => {
             if (this.isDragging) {
                 this.isDragging = false;
+                // Store current image before generating new one
+                if (this.currentImage) {
+                    this.previousImage = this.currentImage;
+                }
                 this.generateFractal();
             }
         });
@@ -162,11 +167,102 @@ class FractalGenerator {
         
         zoomSlider.value = newZoom;
         document.getElementById('zoom-value').textContent = newZoom.toFixed(1);
+    }
+
+    smoothZoom(factor, mousePos) {
+        // Store current image for smooth transition
+        if (this.currentImage && !this.isAnimating) {
+            this.previousImage = this.currentImage;
+        }
         
+        // Update zoom parameters
+        this.zoom(factor, mousePos);
+        
+        // Start smooth zoom animation if we have a previous image
+        if (this.previousImage && !this.isAnimating) {
+            this.startZoomAnimation(factor, mousePos);
+        }
+        
+        // Generate new fractal
         this.generateFractal();
     }
 
+    startZoomAnimation(factor, mousePos) {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+        
+        this.isAnimating = true;
+        this.animationStartTime = performance.now();
+        
+        // Show zoom indicator
+        this.zoomIndicator.classList.add('active');
+        
+        const animate = (currentTime) => {
+            const elapsed = currentTime - this.animationStartTime;
+            const progress = Math.min(elapsed / this.animationDuration, 1);
+            
+            // Easing function for smooth animation
+            const easeProgress = this.easeInOutCubic(progress);
+            
+            this.renderZoomTransition(easeProgress, factor, mousePos);
+            
+            if (progress < 1) {
+                this.animationId = requestAnimationFrame(animate);
+            } else {
+                this.isAnimating = false;
+                this.animationId = null;
+                // Hide zoom indicator
+                this.zoomIndicator.classList.remove('active');
+                // Final render will be handled by the new fractal image loading
+            }
+        };
+        
+        this.animationId = requestAnimationFrame(animate);
+    }
+
+    renderZoomTransition(progress, zoomFactor, mousePos) {
+        if (!this.previousImage) return;
+        
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        
+        // Clear canvas
+        this.ctx.clearRect(0, 0, width, height);
+        
+        // Calculate zoom transition
+        const currentScale = 1 + (zoomFactor - 1) * progress;
+        const centerX = mousePos ? mousePos.x : width / 2;
+        const centerY = mousePos ? mousePos.y : height / 2;
+        
+        // Save context for transformation
+        this.ctx.save();
+        
+        // Apply zoom transformation
+        this.ctx.translate(centerX, centerY);
+        this.ctx.scale(currentScale, currentScale);
+        this.ctx.translate(-centerX, -centerY);
+        
+        // Apply fade effect
+        this.ctx.globalAlpha = 1 - progress * 0.3;
+        
+        // Draw the previous image with transformation
+        this.ctx.drawImage(this.previousImage, 0, 0, width, height);
+        
+        // Restore context
+        this.ctx.restore();
+    }
+
+    easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
     resetView() {
+        // Store current image for smooth transition
+        if (this.currentImage) {
+            this.previousImage = this.currentImage;
+        }
+        
         document.getElementById('zoom').value = '1';
         document.getElementById('zoom-value').textContent = '1.0';
         document.getElementById('center-x').value = '0';
@@ -213,6 +309,11 @@ class FractalGenerator {
         const config = presets[preset];
         if (!config) return;
 
+        // Store current image for smooth transition
+        if (this.currentImage) {
+            this.previousImage = this.currentImage;
+        }
+
         document.getElementById('fractal-type').value = config.fractalType;
         document.getElementById('zoom').value = config.zoom;
         document.getElementById('zoom-value').textContent = config.zoom.toFixed(1);
@@ -251,7 +352,11 @@ class FractalGenerator {
 
     async generateFractal() {
         const startTime = performance.now();
-        this.showLoading(true);
+        
+        // Don't show loading overlay during smooth zoom animations
+        if (!this.isAnimating) {
+            this.showLoading(true);
+        }
 
         try {
             const params = this.getParameters();
@@ -273,8 +378,21 @@ class FractalGenerator {
             
             const img = new Image();
             img.onload = () => {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.ctx.drawImage(img, 0, 0);
+                // Only draw immediately if not animating
+                if (!this.isAnimating) {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.drawImage(img, 0, 0);
+                }
+                
+                // Store the new image for future animations
+                this.currentImage = img;
+                
+                // If animation finished while loading, draw the final image
+                if (!this.isAnimating && this.currentImage) {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.drawImage(this.currentImage, 0, 0);
+                }
+                
                 URL.revokeObjectURL(imageUrl);
                 
                 const endTime = performance.now();
