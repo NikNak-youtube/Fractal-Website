@@ -19,15 +19,15 @@ module.exports = async (req, res) => {
         
         stream.on('end', () => {
             const buffer = Buffer.concat(chunks);
-            res.status(200).send(buffer);
+            return res.status(200).send(buffer);
         });
         
         stream.on('error', (error) => {
             console.error('Error encoding PNG:', error);
-            res.status(500).send('Failed to encode image');
+            return res.status(500).send('Failed to encode image');
         });
     } catch (error) {
         console.error('Error generating fractal:', error);
-        res.status(500).send('Failed to generate fractal');
+        return res.status(500).send('Failed to generate fractal');
     }
 };

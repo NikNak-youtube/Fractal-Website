@@ -38,7 +38,7 @@ fractal-generator/
 │   ├── _utils.js          # Shared utilities
 │   ├── health.js          # Health check endpoint
 │   └── fractal.js         # Fractal generation endpoint
-├── static/                # Static files (HTML, CSS, JS)
+├── public/                # Static files (HTML, CSS, JS) - served automatically
 │   ├── index.html
 │   ├── style.css
 │   └── script.js
@@ -67,7 +67,9 @@ Excludes unnecessary files:
    - `/api/health.js` → `https://your-app.vercel.app/api/health`
    - `/api/fractal.js` → `https://your-app.vercel.app/api/fractal`
 
-2. **Static Assets**: Files in `/static` are served directly
+2. **Static Assets**: Files in `/public` are served automatically at the root
+   - `/public/index.html` → `https://your-app.vercel.app/`
+   - `/public/script.js` → `https://your-app.vercel.app/script.js`
    - Optimized and cached by Vercel's CDN
 
 3. **Image Generation**: Uses `pureimage` - a pure JavaScript library

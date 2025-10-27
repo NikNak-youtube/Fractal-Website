@@ -10,7 +10,7 @@ const PORT = 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/static', express.static(path.join(__dirname, 'static')));
+app.use('/static', express.static(path.join(__dirname, 'public')));
 
 // Complex number operations
 class Complex {
