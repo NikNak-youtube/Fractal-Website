@@ -70,8 +70,9 @@ Excludes unnecessary files:
 2. **Static Assets**: Files in `/static` are served directly
    - Optimized and cached by Vercel's CDN
 
-3. **Canvas Package**: Vercel's Node.js runtime includes native dependencies
-   - No additional configuration needed
+3. **Image Generation**: Uses `pureimage` - a pure JavaScript library
+   - No native dependencies required
+   - Fully compatible with Vercel's serverless environment
 
 ## 🌐 Environment & Runtime
 
@@ -88,10 +89,11 @@ Excludes unnecessary files:
 
 ## 🐛 Troubleshooting
 
-### Canvas Package Issues
-If you see canvas-related errors:
-- Ensure `"node": ">=18.0.0"` is in package.json
-- Vercel supports canvas natively on Node.js 18+
+### Image Generation Issues
+If fractals aren't generating:
+- Check Vercel function logs in dashboard
+- Ensure `pureimage` is in dependencies
+- Verify image parameters are within limits (max 2000x2000 recommended)
 
 ### Build Failures
 - Check Vercel build logs in dashboard

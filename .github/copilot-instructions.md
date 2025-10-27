@@ -5,7 +5,7 @@
 This is a fractal generation website with a Node.js backend using Express web framework and a modern HTML/CSS/JavaScript frontend.
 
 ## Project Structure
-- **Node.js Backend**: Uses Express for web server, node-canvas for PNG generation, and custom complex number operations
+- **Node.js Backend**: Uses Express for web server, pureimage for PNG generation (pure JavaScript, serverless-compatible), and custom complex number operations
 - **Frontend**: Modern responsive web interface with interactive controls for fractal parameters
 - **Fractals Supported**: Mandelbrot set, Julia set, and L-systems with customizable parameters
 

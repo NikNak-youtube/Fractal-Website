@@ -89,7 +89,7 @@ The project includes:
 ### Backend (Node.js)
 
 - **Web Framework**: [Express](https://expressjs.com/) - Fast, minimalist web framework
-- **Image Processing**: [node-canvas](https://github.com/Automattic/node-canvas) - PNG generation using Cairo
+- **Image Processing**: [pureimage](https://github.com/joshmarinacci/node-pureimage) - Pure JavaScript PNG generation (serverless-compatible)
 - **Custom Math**: Complex number operations for fractal calculations
 - **L-System Generation**: Turtle graphics for procedural fractals
 
@@ -159,7 +159,7 @@ fractal-generator/
 {
   "dependencies": {
     "express": "^4.18.2",    // Web framework
-    "canvas": "^2.11.2",     // Image processing
+    "pureimage": "^0.3.5",   // Image processing (pure JS, serverless-compatible)
     "cors": "^2.8.5"         // CORS middleware
   }
 }

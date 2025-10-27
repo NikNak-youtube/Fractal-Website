@@ -1,4 +1,4 @@
-const { createCanvas } = require('canvas');
+const PImage = require('pureimage');
 
 // Complex number operations
 class Complex {
@@ -241,44 +241,6 @@ function parseCustomRules(rulesString) {
     return rules;
 }
 
-// Draw line using Bresenham's algorithm
-function drawLine(imageData, width, height, x1, y1, x2, y2, color) {
-    x1 = Math.floor(x1);
-    y1 = Math.floor(y1);
-    x2 = Math.floor(x2);
-    y2 = Math.floor(y2);
-
-    const dx = Math.abs(x2 - x1);
-    const dy = Math.abs(y2 - y1);
-    const xInc = x1 < x2 ? 1 : -1;
-    const yInc = y1 < y2 ? 1 : -1;
-    let error = dx - dy;
-
-    let x = x1, y = y1;
-
-    while (true) {
-        if (x >= 0 && x < width && y >= 0 && y < height) {
-            const idx = (y * width + x) * 4;
-            imageData.data[idx] = color.r;
-            imageData.data[idx + 1] = color.g;
-            imageData.data[idx + 2] = color.b;
-            imageData.data[idx + 3] = 255;
-        }
-
-        if (x === x2 && y === y2) break;
-
-        const e2 = 2 * error;
-        if (e2 > -dy) {
-            error -= dy;
-            x += xInc;
-        }
-        if (e2 < dx) {
-            error += dx;
-            y += yInc;
-        }
-    }
-}
-
 // Generate L-system fractal
 function generateLSystemFractal(params) {
     const { width, height, zoom, centerX, centerY, colorScheme, 
@@ -309,8 +271,11 @@ function generateLSystemFractal(params) {
     const boundsHeight = bounds.maxY - bounds.minY;
 
     if (boundsWidth === 0 || boundsHeight === 0) {
-        const canvas = createCanvas(width, height);
-        return canvas;
+        const img = PImage.make(width, height);
+        const ctx = img.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, width, height);
+        return img;
     }
 
     const scaleX = (width - 40) / boundsWidth * zoom;
@@ -320,46 +285,47 @@ function generateLSystemFractal(params) {
     const offsetX = (width / 2) - (boundsWidth * scale / 2) - (bounds.minX * scale) + centerX * 50;
     const offsetY = (height / 2) - (boundsHeight * scale / 2) - (bounds.minY * scale) + centerY * 50;
 
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.createImageData(width, height);
-
+    const img = PImage.make(width, height);
+    const ctx = img.getContext('2d');
+    
     // Fill with white background
-    for (let i = 0; i < imageData.data.length; i += 4) {
-        imageData.data[i] = 255;
-        imageData.data[i + 1] = 255;
-        imageData.data[i + 2] = 255;
-        imageData.data[i + 3] = 255;
-    }
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, width, height);
 
     // Determine line color
     let lineColor;
     switch (colorScheme) {
         case 'fire':
-            lineColor = { r: 255, g: 100, b: 0 };
+            lineColor = 'rgb(255, 100, 0)';
             break;
         case 'ocean':
-            lineColor = { r: 0, g: 100, b: 255 };
+            lineColor = 'rgb(0, 100, 255)';
             break;
         case 'classic':
-            lineColor = { r: 0, g: 150, b: 0 };
+            lineColor = 'rgb(0, 150, 0)';
             break;
         default:
-            lineColor = { r: 0, g: 0, b: 0 };
+            lineColor = 'black';
     }
 
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 1;
+
     // Draw lines
-    for (const line of turtle.lines) {
+    ctx.beginPath();
+    for (let i = 0; i < turtle.lines.length; i++) {
+        const line = turtle.lines[i];
         const screenX1 = line.x1 * scale + offsetX;
         const screenY1 = line.y1 * scale + offsetY;
         const screenX2 = line.x2 * scale + offsetX;
         const screenY2 = line.y2 * scale + offsetY;
 
-        drawLine(imageData, width, height, screenX1, screenY1, screenX2, screenY2, lineColor);
+        ctx.moveTo(screenX1, screenY1);
+        ctx.lineTo(screenX2, screenY2);
     }
+    ctx.stroke();
 
-    ctx.putImageData(imageData, 0, 0);
-    return canvas;
+    return img;
 }
 
 // Generate mathematical fractal (Mandelbrot or Julia)
@@ -369,9 +335,8 @@ function generateMathematicalFractal(params) {
 
     const scale = 4.0 / (zoom * Math.min(width, height));
     
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
-    const imageData = ctx.createImageData(width, height);
+    const img = PImage.make(width, height);
+    const ctx = img.getContext('2d');
 
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -389,16 +354,12 @@ function generateMathematicalFractal(params) {
             }
 
             const color = colorFromIterations(iterations, maxIter, colorScheme);
-            const idx = (y * width + x) * 4;
-            imageData.data[idx] = color.r;
-            imageData.data[idx + 1] = color.g;
-            imageData.data[idx + 2] = color.b;
-            imageData.data[idx + 3] = 255;
+            ctx.fillStyle = `rgb(${color.r}, ${color.g}, ${color.b})`;
+            ctx.fillRect(x, y, 1, 1);
         }
     }
 
-    ctx.putImageData(imageData, 0, 0);
-    return canvas;
+    return img;
 }
 
 // Generate fractal based on type
