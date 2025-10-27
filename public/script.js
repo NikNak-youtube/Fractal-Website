@@ -489,13 +489,20 @@ class FractalGenerator {
 
             // Build query string
             const queryString = new URLSearchParams(params).toString();
+            console.log('Fetching fractal with params:', params);
             const response = await fetch(`/api/fractal?${queryString}`);
 
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
             }
 
             const blob = await response.blob();
+            console.log('Blob received:', blob.type, blob.size);
             const imageUrl = URL.createObjectURL(blob);
             
             const img = new Image();
@@ -524,8 +531,11 @@ class FractalGenerator {
                 this.showLoading(false);
             };
             
-            img.onerror = () => {
+            img.onerror = (e) => {
                 console.error('Failed to load generated image');
+                console.error('Image error event:', e);
+                console.error('Image src:', img.src);
+                this.generationTimeElement.textContent = 'Error loading image';
                 this.showLoading(false);
             };
             
@@ -533,7 +543,8 @@ class FractalGenerator {
 
         } catch (error) {
             console.error('Error generating fractal:', error);
-            this.generationTimeElement.textContent = 'Error generating fractal';
+            console.error('Error stack:', error.stack);
+            this.generationTimeElement.textContent = `Error: ${error.message}`;
             this.showLoading(false);
         }
     }

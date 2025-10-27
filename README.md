@@ -1,10 +1,10 @@
 # 🌟 Fractal Generator
 
-A beautiful web application for generating and exploring mathematical fractals with a Node.js backend and an interactive modern frontend.
+A beautiful web application for generating and exploring mathematical fractals with a Next.js and React frontend and serverless API backend.
 
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
-![Web Technologies](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
 ## ✨ Features
@@ -23,7 +23,7 @@ A beautiful web application for generating and exploring mathematical fractals w
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (version 14.0.0 or higher)
+- [Node.js](https://nodejs.org/) (version 18.0.0 or higher)
 - npm (comes with Node.js)
 - A modern web browser
 
@@ -37,21 +37,15 @@ A beautiful web application for generating and exploring mathematical fractals w
    npm install
    ```
 
-4. **Run the server**:
-
-   ```bash
-   npm start
-   ```
-
-   Or for development with auto-reload:
+4. **Run the development server**:
 
    ```bash
    npm run dev
    ```
 
-5. **Open your browser** and visit: `http://127.0.0.1:3001`
+5. **Open your browser** and visit: `http://localhost:3000`
 
-The server will automatically serve the web interface and handle fractal generation requests.
+The Next.js development server will automatically serve the web interface and handle fractal generation requests with hot reloading.
 
 ## ☁️ Deploy to Vercel
 
@@ -86,19 +80,19 @@ The project includes:
 
 ## 🏗️ Architecture
 
-### Backend (Node.js)
+### Frontend (Next.js + React)
 
-- **Web Framework**: [Express](https://expressjs.com/) - Fast, minimalist web framework
+- **Framework**: [Next.js 14](https://nextjs.org/) with App Router - React framework with server-side rendering
+- **UI Library**: [React 18](https://react.dev/) - Component-based UI
+- **Styling**: CSS Modules with global styles - Responsive design
+- **Canvas API**: HTML5 Canvas for fractal display and interaction
+
+### Backend (Next.js API Routes)
+
+- **API Routes**: Next.js serverless functions - Automatic API endpoints
 - **Image Processing**: [pureimage](https://github.com/joshmarinacci/node-pureimage) - Pure JavaScript PNG generation (serverless-compatible)
 - **Custom Math**: Complex number operations for fractal calculations
 - **L-System Generation**: Turtle graphics for procedural fractals
-
-### Frontend
-
-- **Vanilla JavaScript** - Modern ES6+ features
-- **CSS Grid & Flexbox** - Responsive layout
-- **Canvas API** - Image display and interaction
-- **Fetch API** - Communication with Node.js backend
 
 ## 🎮 Usage
 
@@ -142,14 +136,20 @@ The project includes:
 
 ```text
 fractal-generator/
-├── server.js            # Node.js backend server
-├── static/
-│   ├── index.html       # Main web interface
-│   ├── style.css        # Styling and responsive design
-│   └── script.js        # Frontend functionality
-├── .github/
-│   └── copilot-instructions.md
-├── package.json         # Node.js dependencies
+├── app/                 # Next.js App Router
+│   ├── api/            # API Routes (serverless functions)
+│   │   ├── fractal/    
+│   │   │   └── route.js # Fractal generation endpoint
+│   │   └── health/
+│   │       └── route.js # Health check endpoint
+│   ├── layout.js       # Root layout with global CSS
+│   ├── page.js         # Main page (React component)
+│   └── globals.css     # Global styling
+├── lib/                # Utilities and helpers
+│   └── fractal-utils.js # Fractal generation logic
+├── public/             # Static assets (served at root)
+├── next.config.js      # Next.js configuration
+├── package.json        # Dependencies
 └── README.md
 ```
 
@@ -158,23 +158,25 @@ fractal-generator/
 ```json
 {
   "dependencies": {
-    "express": "^4.18.2",    // Web framework
-    "pureimage": "^0.3.5",   // Image processing (pure JS, serverless-compatible)
-    "cors": "^2.8.5"         // CORS middleware
+    "next": "^14.0.4",       // React framework
+    "react": "^18.2.0",      // UI library
+    "react-dom": "^18.2.0",  // React DOM renderer
+    "pureimage": "^0.3.5"    // Image processing (serverless-compatible)
   }
 }
 ```
 
 ### Building for Production
 
-The application is ready to run without a build step. For production deployment:
-
 ```bash
-# Install production dependencies only
-npm install --production
+# Build the production version
+npm run build
 
-# Run with Node.js
-node server.js
+# Run the production build locally
+npm start
+
+# Or deploy to Vercel (recommended)
+vercel --prod
 ```
 
 ## 🎯 Fractal Mathematics

@@ -4,6 +4,14 @@ npm-debug.log
 yarn-error.log
 package-lock.json
 .env
+.env.local
+.env.production.local
+
+# Next.js
+.next/
+out/
+build/
+dist/
 
 # Vercel
 .vercel

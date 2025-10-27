@@ -5,3 +5,6 @@ node_modules
 .DS_Store
 server.js
 README.md
+api
+public/script.js
+.next

@@ -9,25 +9,35 @@ module.exports = async (req, res) => {
         res.setHeader('Content-Type', 'image/png');
         res.setHeader('Cache-Control', 'no-cache');
         
-        // Encode to PNG buffer
-        const chunks = [];
-        const stream = PImage.encodePNGToStream(img);
+        // Create a promise-based PNG encoder
+        const encodePNG = (image) => {
+            return new Promise((resolve, reject) => {
+                const chunks = [];
+                const stream = PImage.encodePNGToStream(image);
+                
+                stream.on('data', (chunk) => {
+                    chunks.push(chunk);
+                });
+                
+                stream.on('end', () => {
+                    resolve(Buffer.concat(chunks));
+                });
+                
+                stream.on('error', (error) => {
+                    reject(error);
+                });
+            });
+        };
         
-        stream.on('data', (chunk) => {
-            chunks.push(chunk);
-        });
+        const buffer = await encodePNG(img);
+        return res.status(200).send(buffer);
         
-        stream.on('end', () => {
-            const buffer = Buffer.concat(chunks);
-            return res.status(200).send(buffer);
-        });
-        
-        stream.on('error', (error) => {
-            console.error('Error encoding PNG:', error);
-            return res.status(500).send('Failed to encode image');
-        });
     } catch (error) {
         console.error('Error generating fractal:', error);
-        return res.status(500).send('Failed to generate fractal');
+        console.error('Error stack:', error.stack);
+        return res.status(500).json({ 
+            error: 'Failed to generate fractal',
+            message: error.message 
+        });
     }
 };

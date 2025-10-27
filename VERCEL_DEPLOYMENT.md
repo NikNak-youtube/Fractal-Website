@@ -34,47 +34,67 @@ vercel --prod
 
 ```
 fractal-generator/
-├── api/                    # Serverless functions
-│   ├── _utils.js          # Shared utilities
-│   ├── health.js          # Health check endpoint
-│   └── fractal.js         # Fractal generation endpoint
-├── public/                # Static files (HTML, CSS, JS) - served automatically
-│   ├── index.html
-│   ├── style.css
-│   └── script.js
+├── app/                    # Next.js App Router
+│   ├── api/               # API Routes (serverless functions)
+│   │   ├── fractal/
+│   │   │   └── route.js   # Fractal generation endpoint
+│   │   └── health/
+│   │       └── route.js   # Health check endpoint
+│   ├── layout.js          # Root layout
+│   ├── page.js            # Main page (React component)
+│   └── globals.css        # Global styles
+├── lib/                   # Utilities
+│   └── fractal-utils.js  # Fractal generation logic
+├── public/                # Static files - served automatically
+├── next.config.js         # Next.js configuration
 ├── vercel.json            # Vercel configuration
-├── .vercelignore          # Files to exclude
 └── package.json           # Dependencies
 ```
 
 ## ⚙️ Configuration Files
 
 ### vercel.json
-Defines:
-- Serverless function routes (`/api/*`)
-- Static file serving (`/static/*`)
-- Root route redirects to main page
+Minimal configuration - Vercel auto-detects Next.js:
+```json
+{
+  "version": 2
+}
+```
 
-### .vercelignore
-Excludes unnecessary files:
-- `node_modules` (Vercel installs fresh)
-- `server.js` (not needed for serverless)
-- Git files and logs
+### next.config.js
+Next.js configuration:
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true
+}
+
+module.exports = nextConfig
+```
 
 ## 🔧 How It Works
 
-1. **Serverless Functions**: Each file in `/api` becomes an HTTP endpoint
-   - `/api/health.js` → `https://your-app.vercel.app/api/health`
-   - `/api/fractal.js` → `https://your-app.vercel.app/api/fractal`
+1. **Next.js Framework**: Vercel automatically detects and optimizes Next.js projects
+   - Zero-config deployment
+   - Automatic serverless function setup
+   - Built-in performance optimizations
 
-2. **Static Assets**: Files in `/public` are served automatically at the root
-   - `/public/index.html` → `https://your-app.vercel.app/`
-   - `/public/script.js` → `https://your-app.vercel.app/script.js`
+2. **API Routes**: Files in `/app/api` become serverless endpoints
+   - `/app/api/health/route.js` → `https://your-app.vercel.app/api/health`
+   - `/app/api/fractal/route.js` → `https://your-app.vercel.app/api/fractal`
+
+3. **Static Assets**: Files in `/public` are served automatically
    - Optimized and cached by Vercel's CDN
+   - Next.js handles all routing and optimization
 
-3. **Image Generation**: Uses `pureimage` - a pure JavaScript library
+4. **Image Generation**: Uses `pureimage` - a pure JavaScript library
    - No native dependencies required
    - Fully compatible with Vercel's serverless environment
+
+5. **React Frontend**: Server-side rendering with client-side interactivity
+   - `/app/page.js` renders the main UI
+   - React components for fractal controls
+   - Canvas API for image display
 
 ## 🌐 Environment & Runtime
 
@@ -103,9 +123,14 @@ If fractals aren't generating:
 - Verify `vercel.json` syntax is valid
 
 ### Route Not Found
-- Verify file exists in `/api` directory
-- Check `vercel.json` routes configuration
-- Ensure function exports correctly: `module.exports = async (req, res) => {...}`
+- Verify API route structure: `/app/api/[endpoint]/route.js`
+- Check that route exports GET/POST handlers properly:
+  ```javascript
+  export async function GET(request) {
+    // handler code
+  }
+  ```
+- Clear `.next` cache: `rm -rf .next && npm run build`
 
 ## 🔗 Custom Domain
 
