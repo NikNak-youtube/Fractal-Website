@@ -218,14 +218,54 @@ Contributions are welcome! Areas for improvement:
 - UI/UX enhancements
 - Mobile-specific features
 
-## 📄 License
+## � Troubleshooting
+
+### 404 Error on API Routes
+
+If you see "404" errors when trying to generate fractals:
+
+1. **Remove old API folder**: Make sure the old `/api` folder is deleted
+   ```bash
+   rm -rf api server.js
+   ```
+
+2. **Clear Next.js cache**:
+   ```bash
+   rm -rf .next
+   ```
+
+3. **Reinstall dependencies**:
+   ```bash
+   npm install
+   ```
+
+4. **Restart dev server**:
+   ```bash
+   npm run dev
+   ```
+
+### Images Not Displaying
+
+If fractals aren't showing:
+- Check browser console for errors
+- Verify the API route is working: visit `http://localhost:3000/api/health`
+- Ensure pureimage is installed: `npm install pureimage`
+
+### Build Errors
+
+If you encounter build errors:
+- Ensure Node.js version is 18.0.0 or higher: `node --version`
+- Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
+- Check that all files in `app/api/*/route.js` use Next.js format (export GET/POST functions)
+
+## �📄 License
 
 This project is open source and available under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- Node.js and Express communities for excellent tools
-- node-canvas library for server-side image generation
+- Next.js and React communities for excellent frameworks
+- pureimage library for pure JavaScript image generation (serverless-compatible)
 - Mathematical beauty of fractal geometry and L-systems
 
 ---
