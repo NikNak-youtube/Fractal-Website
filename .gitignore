@@ -5,5 +5,8 @@ yarn-error.log
 package-lock.json
 .env
 
+# Vercel
+.vercel
+
 # Rust (legacy)
 /target

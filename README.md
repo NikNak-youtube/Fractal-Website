@@ -53,6 +53,37 @@ A beautiful web application for generating and exploring mathematical fractals w
 
 The server will automatically serve the web interface and handle fractal generation requests.
 
+## ☁️ Deploy to Vercel
+
+This project is configured for easy deployment to Vercel:
+
+1. **Install Vercel CLI** (optional):
+   ```bash
+   npm i -g vercel
+   ```
+
+2. **Deploy**:
+   - Push your code to GitHub
+   - Import the project in [Vercel Dashboard](https://vercel.com/new)
+   - Vercel will automatically detect the configuration
+   - Click "Deploy"
+
+   Or use the CLI:
+   ```bash
+   vercel
+   ```
+
+3. **Environment Variables** (if needed):
+   - No environment variables required for basic deployment
+
+The project includes:
+- `vercel.json` - Routing and build configuration
+- `.vercelignore` - Files to exclude from deployment
+- Serverless API functions in `/api` directory
+- Static files served from `/static` directory
+
+**Note**: Vercel automatically handles the `canvas` package dependencies in their Node.js runtime.
+
 ## 🏗️ Architecture
 
 ### Backend (Node.js)
