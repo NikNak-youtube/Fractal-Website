@@ -2,12 +2,12 @@
 
 # Fractal Generator Project
 
-This is a fractal generation website with a Rust backend using Axum web framework and a modern HTML/CSS/JavaScript frontend.
+This is a fractal generation website with a Node.js backend using Express web framework and a modern HTML/CSS/JavaScript frontend.
 
 ## Project Structure
-- **Rust Backend**: Uses Axum for web server, image processing for PNG generation, num-complex for complex number operations, and rayon for parallel processing
+- **Node.js Backend**: Uses Express for web server, node-canvas for PNG generation, and custom complex number operations
 - **Frontend**: Modern responsive web interface with interactive controls for fractal parameters
-- **Fractals Supported**: Mandelbrot set and Julia set with customizable parameters
+- **Fractals Supported**: Mandelbrot set, Julia set, and L-systems with customizable parameters
 
 ## Key Features
 - Real-time fractal generation with customizable parameters
@@ -18,10 +18,10 @@ This is a fractal generation website with a Rust backend using Axum web framewor
 - Download functionality for generated fractal images
 
 ## Development Guidelines
-- Follow Rust best practices for the backend
-- Use modern JavaScript (ES6+) for frontend functionality
+- Follow Node.js best practices for the backend
+- Use modern JavaScript (ES6+) for both frontend and backend functionality
 - Maintain responsive design principles
-- Optimize performance for fractal generation (use parallel processing)
+- Optimize performance for fractal generation
 - Keep the UI intuitive and accessible
 
 ## API Endpoints

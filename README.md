@@ -1,69 +1,84 @@
 # 🌟 Fractal Generator
 
-A beautiful web application for generating and exploring mathematical fractals with a high-performance Rust backend and an interactive modern frontend.
+A beautiful web application for generating and exploring mathematical fractals with a Node.js backend and an interactive modern frontend.
 
-![Fractal Generator Preview](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)
 ![Web Technologies](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
 ## ✨ Features
 
-- **🎨 Multiple Fractal Types**: Generate Mandelbrot and Julia sets
+- **🎨 Multiple Fractal Types**: Generate Mandelbrot sets, Julia sets, and L-systems
 - **🔍 Interactive Controls**: Real-time zoom, pan, and parameter adjustment
 - **🌈 Color Schemes**: Choose from classic, fire, ocean, and grayscale palettes
-- **⚡ High Performance**: Rust backend with parallel processing using Rayon
+- **⚡ High Performance**: Efficient Node.js backend with Canvas API
 - **📱 Responsive Design**: Works beautifully on desktop and mobile devices
 - **🎯 Preset Configurations**: Quick access to interesting fractal views
 - **💾 Download Support**: Save your favorite fractals as PNG images
 - **🖱️ Mouse Controls**: Click and drag to pan, scroll to zoom
+- **🌳 L-System Fractals**: Generate procedural tree-like and geometric patterns
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- [Rust](https://rustup.rs/) (latest stable version)
+- [Node.js](https://nodejs.org/) (version 14.0.0 or higher)
+- npm (comes with Node.js)
 - A modern web browser
 
 ### Installation & Running
 
 1. **Clone or download the project**
 2. **Navigate to the project directory**
-3. **Install dependencies and run**:
+3. **Install dependencies**:
 
    ```bash
-   cargo run
+   npm install
    ```
 
-4. **Open your browser** and visit: `http://127.0.0.1:3000`
+4. **Run the server**:
+
+   ```bash
+   npm start
+   ```
+
+   Or for development with auto-reload:
+
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser** and visit: `http://127.0.0.1:3001`
 
 The server will automatically serve the web interface and handle fractal generation requests.
 
 ## 🏗️ Architecture
 
-### Backend (Rust)
+### Backend (Node.js)
 
-- **Web Framework**: [Axum](https://github.com/tokio-rs/axum) - Fast, ergonomic web framework
-- **Image Processing**: [image crate](https://github.com/image-rs/image) - PNG generation
-- **Math**: [num-complex](https://github.com/rust-num/num-complex) - Complex number operations
-- **Parallelization**: [Rayon](https://github.com/rayon-rs/rayon) - Data parallelism for faster rendering
-- **Async Runtime**: [Tokio](https://tokio.rs/) - Asynchronous runtime
+- **Web Framework**: [Express](https://expressjs.com/) - Fast, minimalist web framework
+- **Image Processing**: [node-canvas](https://github.com/Automattic/node-canvas) - PNG generation using Cairo
+- **Custom Math**: Complex number operations for fractal calculations
+- **L-System Generation**: Turtle graphics for procedural fractals
 
 ### Frontend
 
 - **Vanilla JavaScript** - Modern ES6+ features
 - **CSS Grid & Flexbox** - Responsive layout
 - **Canvas API** - Image display and interaction
-- **Fetch API** - Communication with Rust backend
+- **Fetch API** - Communication with Node.js backend
 
 ## 🎮 Usage
 
 ### Basic Controls
 
-1. **Fractal Type**: Choose between Mandelbrot and Julia sets
+1. **Fractal Type**: Choose between Mandelbrot sets, Julia sets, and L-systems
 2. **Image Settings**: Adjust width, height, and iteration count
 3. **View Controls**: Zoom and pan to explore different areas
 4. **Color Schemes**: Select visual style for the fractal
 5. **Julia Parameters**: When using Julia sets, adjust the complex constant
+6. **L-System Controls**: Select presets or create custom L-systems with rules and angles
 
 ### Interactive Features
 
@@ -75,13 +90,19 @@ The server will automatically serve the web interface and handle fractal generat
 
 ### API Endpoints
 
+- `GET /` - Serve the main web interface
+- `GET /api/health` - Health check endpoint
 - `GET /api/fractal` - Generate fractal with parameters:
   - `width`, `height` - Image dimensions
   - `zoom` - Zoom level
   - `center_x`, `center_y` - Center coordinates
   - `max_iter` - Maximum iterations
-  - `fractal_type` - "mandelbrot" or "julia"
+  - `fractal_type` - "mandelbrot", "julia", or "lsystem"
   - `julia_c_real`, `julia_c_imag` - Julia set parameters
+  - `lsystem_preset` - L-system preset name
+  - `lsystem_iterations` - Number of L-system iterations
+  - `lsystem_angle` - Angle for L-system turns
+  - `custom_axiom`, `custom_rules` - Custom L-system definition
   - `color_scheme` - Color palette selection
 
 ## 🛠️ Development
@@ -90,39 +111,39 @@ The server will automatically serve the web interface and handle fractal generat
 
 ```text
 fractal-generator/
-├── src/
-│   └── main.rs          # Rust backend server
+├── server.js            # Node.js backend server
 ├── static/
 │   ├── index.html       # Main web interface
 │   ├── style.css        # Styling and responsive design
 │   └── script.js        # Frontend functionality
 ├── .github/
 │   └── copilot-instructions.md
-├── Cargo.toml           # Rust dependencies
+├── package.json         # Node.js dependencies
 └── README.md
 ```
 
 ### Key Dependencies
 
-```toml
-[dependencies]
-axum = "0.7"              # Web framework
-tokio = { version = "1.0", features = ["full"] }
-tower-http = { version = "0.5", features = ["cors", "fs"] }
-image = "0.24"            # Image processing
-num-complex = "0.4"       # Complex numbers
-rayon = "1.7"             # Parallel processing
-serde = { version = "1.0", features = ["derive"] }
+```json
+{
+  "dependencies": {
+    "express": "^4.18.2",    // Web framework
+    "canvas": "^2.11.2",     // Image processing
+    "cors": "^2.8.5"         // CORS middleware
+  }
+}
 ```
 
 ### Building for Production
 
-```bash
-# Build optimized release version
-cargo build --release
+The application is ready to run without a build step. For production deployment:
 
-# Run the release version
-cargo run --release
+```bash
+# Install production dependencies only
+npm install --production
+
+# Run with Node.js
+node server.js
 ```
 
 ## 🎯 Fractal Mathematics
@@ -170,9 +191,9 @@ This project is open source and available under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- Rust community for excellent mathematical libraries
-- Axum team for the fantastic web framework
-- Mathematical beauty of fractal geometry
+- Node.js and Express communities for excellent tools
+- node-canvas library for server-side image generation
+- Mathematical beauty of fractal geometry and L-systems
 
 ---
 
