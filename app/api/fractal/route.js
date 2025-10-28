@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateFractal, parseParams } from '@/lib/fractal-utils';
-import PImage from 'pureimage';
+import * as PImage from 'pureimage';
 
 // Mark this route as dynamic for serverless
 export const dynamic = 'force-dynamic';
