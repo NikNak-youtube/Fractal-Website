@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { generateFractal, parseParams } from '@/lib/fractal-utils';
-const PImage = require('pureimage');
 
 // Mark this route as dynamic for serverless
 export const dynamic = 'force-dynamic';
@@ -8,6 +7,8 @@ export const runtime = 'nodejs';
 
 export async function GET(request) {
   try {
+    const PImage = require('pureimage');
+    
     const { searchParams } = request.nextUrl;
     const query = Object.fromEntries(searchParams.entries());
     
