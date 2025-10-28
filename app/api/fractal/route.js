@@ -9,6 +9,8 @@ export async function GET(request) {
   try {
     const PImage = require('pureimage');
     
+    console.log('PImage loaded:', typeof PImage, 'has encodePNGToStream:', typeof PImage.encodePNGToStream);
+    
     const { searchParams } = request.nextUrl;
     const query = Object.fromEntries(searchParams.entries());
     
@@ -17,25 +19,36 @@ export async function GET(request) {
     const params = parseParams(query);
     const img = generateFractal(params);
     
-    console.log('Fractal generated, encoding PNG...');
+    console.log('Fractal generated, image type:', typeof img, 'has getContext:', typeof img?.getContext);
+    console.log('Encoding PNG...');
     
     // Create a promise-based PNG encoder
     const encodePNG = (image) => {
       return new Promise((resolve, reject) => {
         const chunks = [];
-        const stream = PImage.encodePNGToStream(image);
         
-        stream.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-        
-        stream.on('end', () => {
-          resolve(Buffer.concat(chunks));
-        });
-        
-        stream.on('error', (error) => {
-          reject(error);
-        });
+        try {
+          const stream = PImage.encodePNGToStream(image);
+          
+          if (!stream || typeof stream.on !== 'function') {
+            reject(new Error('Invalid stream from encodePNGToStream'));
+            return;
+          }
+          
+          stream.on('data', (chunk) => {
+            chunks.push(chunk);
+          });
+          
+          stream.on('end', () => {
+            resolve(Buffer.concat(chunks));
+          });
+          
+          stream.on('error', (error) => {
+            reject(error);
+          });
+        } catch (err) {
+          reject(err);
+        }
       });
     };
     
