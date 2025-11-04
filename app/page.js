@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { generateMandelbrot, generateJulia, generateLSystem } from '@/lib/client-fractal';
 
 export default function FractalGenerator() {
   // State for form controls
@@ -33,75 +34,48 @@ export default function FractalGenerator() {
   const canvasRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(null);
   
-  // Generate fractal
+  // Generate fractal (client-side)
   const generateFractal = async () => {
     const startTime = performance.now();
     setLoading(true);
     
     try {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        throw new Error('Canvas not found');
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
       const params = {
         width,
         height,
         zoom,
-        center_x: centerX,
-        center_y: centerY,
-        max_iter: maxIter,
-        fractal_type: fractalType,
-        julia_c_real: juliaCReal,
-        julia_c_imag: juliaCImag,
-        color_scheme: colorScheme,
-        lsystem_preset: lsystemPreset,
-        lsystem_iterations: lsystemIterations,
-        lsystem_angle: lsystemAngle,
-        custom_axiom: customAxiom,
-        custom_rules: customRules
+        centerX,
+        centerY,
+        maxIter,
+        colorScheme,
+        juliaCReal,
+        juliaCImag,
+        lsystemPreset,
+        lsystemIterations,
+        lsystemAngle
       };
-      
-      const queryString = new URLSearchParams(params).toString();
-      console.log('Fetching fractal with params:', params);
-      
-      const response = await fetch(`/api/fractal?${queryString}`);
-      
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`HTTP error! status: ${response.status}`);
+
+      // Generate based on fractal type
+      if (fractalType === 'mandelbrot') {
+        generateMandelbrot(canvas, params);
+      } else if (fractalType === 'julia') {
+        generateJulia(canvas, params);
+      } else if (fractalType === 'lsystem') {
+        generateLSystem(canvas, params);
       }
-      
-      const blob = await response.blob();
-      console.log('Blob received:', blob.type, blob.size);
-      
-      const imageUrl = URL.createObjectURL(blob);
-      const img = new Image();
-      
-      img.onload = () => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, width, height);
-          ctx.drawImage(img, 0, 0);
-        }
-        
-        setCurrentImage(img);
-        URL.revokeObjectURL(imageUrl);
-        
-        const endTime = performance.now();
-        const time = ((endTime - startTime) / 1000).toFixed(2);
-        setGenerationTime(`Generated in ${time}s`);
-        setLoading(false);
-      };
-      
-      img.onerror = (e) => {
-        console.error('Failed to load generated image', e);
-        setGenerationTime('Error loading image');
-        setLoading(false);
-      };
-      
-      img.src = imageUrl;
+
+      const endTime = performance.now();
+      const time = ((endTime - startTime) / 1000).toFixed(2);
+      setGenerationTime(`Generated in ${time}s`);
+      setLoading(false);
       
     } catch (error) {
       console.error('Error generating fractal:', error);
