@@ -149,10 +149,10 @@ export default function FractalGenerator() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Convert pixel coordinates to fractal coordinates
+    // Convert pixel coordinates to fractal coordinates (negated)
     const scale = 4.0 / (zoom * Math.min(width, height));
-    const clickedX = centerX + (x - width / 2) * scale;
-    const clickedY = centerY + (y - height / 2) * scale;
+    const clickedX = centerX - (x - width / 2) * scale;
+    const clickedY = centerY - (y - height / 2) * scale;
 
     // Double the zoom and set new center
     setZoom(zoom * 2);
