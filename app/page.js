@@ -33,6 +33,7 @@ export default function FractalGenerator() {
   
   const canvasRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(null);
+  const [canvasTransform, setCanvasTransform] = useState({ scale: 1, translateX: 0, translateY: 0 });
   
   // Generate fractal (client-side)
   const generateFractal = async () => {
@@ -77,10 +78,14 @@ export default function FractalGenerator() {
       setGenerationTime(`Generated in ${time}s`);
       setLoading(false);
       
+      // Reset transform after generation
+      setCanvasTransform({ scale: 1, translateX: 0, translateY: 0 });
+      
     } catch (error) {
       console.error('Error generating fractal:', error);
       setGenerationTime(`Error: ${error.message}`);
       setLoading(false);
+      setCanvasTransform({ scale: 1, translateX: 0, translateY: 0 });
     }
   };
   
@@ -156,6 +161,12 @@ export default function FractalGenerator() {
     const clickedX = centerX + offsetX;
     const clickedY = centerY + offsetY;
 
+    // Apply instant visual zoom
+    const zoomFactor = 2;
+    const translateX = (width / 2 - x) * (zoomFactor - 1);
+    const translateY = (height / 2 - y) * (zoomFactor - 1);
+    setCanvasTransform({ scale: zoomFactor, translateX, translateY });
+
     // Double the zoom and set new center
     setZoom(zoom * 2);
     setCenterX(clickedX);
@@ -164,6 +175,134 @@ export default function FractalGenerator() {
     // Regenerate fractal with new parameters
     setTimeout(() => generateFractal(), 50);
   };
+
+  // Handle scroll wheel zoom
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Calculate zoom direction and factor
+    const zoomFactor = e.deltaY < 0 ? 1.2 : 0.8;
+    const newZoom = zoom * zoomFactor;
+
+    // Apply instant visual zoom
+    const translateX = (width / 2 - x) * (zoomFactor - 1);
+    const translateY = (height / 2 - y) * (zoomFactor - 1);
+    setCanvasTransform(prev => ({
+      scale: prev.scale * zoomFactor,
+      translateX: prev.translateX + translateX,
+      translateY: prev.translateY + translateY
+    }));
+
+    // Convert mouse position to fractal coordinates
+    const scale = 4.0 / (zoom * Math.min(width, height));
+    const offsetX = (x - width / 2) * scale * 0.5;
+    const offsetY = (y - height / 2) * scale * 0.5;
+    const mouseX = centerX + offsetX;
+    const mouseY = centerY + offsetY;
+
+    // Adjust center to zoom towards mouse position
+    const newCenterX = mouseX - (mouseX - centerX) * (zoom / newZoom);
+    const newCenterY = mouseY - (mouseY - centerY) * (zoom / newZoom);
+
+    setZoom(newZoom);
+    setCenterX(newCenterX);
+    setCenterY(newCenterY);
+
+    setTimeout(() => generateFractal(), 50);
+  };
+
+  // Handle touch events for pinch zoom
+  const [touchDistance, setTouchDistance] = useState(null);
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 2) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      setTouchDistance(dist);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 2 && touchDistance) {
+      e.preventDefault();
+      const newDist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      
+      const zoomFactor = newDist / touchDistance;
+      const newZoom = zoom * zoomFactor;
+      
+      // Apply instant visual zoom
+      setCanvasTransform(prev => ({
+        scale: prev.scale * zoomFactor,
+        translateX: prev.translateX,
+        translateY: prev.translateY
+      }));
+      
+      setZoom(newZoom);
+      setTouchDistance(newDist);
+      
+      setTimeout(() => generateFractal(), 50);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchDistance(null);
+  };
+
+  // Toggle fullscreen
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    if (!isFullscreen) {
+      if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+      } else if (canvas.webkitRequestFullscreen) {
+        canvas.webkitRequestFullscreen();
+      } else if (canvas.msRequestFullscreen) {
+        canvas.msRequestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  // Listen for fullscreen change
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('msfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
   
   return (
     <div className="container">
@@ -322,12 +461,27 @@ export default function FractalGenerator() {
             width={width} 
             height={height}
             onClick={handleCanvasClick}
-            style={{ cursor: 'pointer' }}
+            onWheel={handleWheel}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            style={{ 
+              cursor: 'pointer', 
+              touchAction: 'none',
+              transform: `translate(${canvasTransform.translateX}px, ${canvasTransform.translateY}px) scale(${canvasTransform.scale})`,
+              transformOrigin: 'center center',
+              transition: 'none'
+            }}
           />
           
           <div className="fractal-info">
             <span className="generation-time">{generationTime}</span>
-            <button onClick={downloadCanvas} className="download-button">💾 Download</button>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={toggleFullscreen} className="download-button">
+                {isFullscreen ? '🔲 Exit Fullscreen' : '⛶ Fullscreen'}
+              </button>
+              <button onClick={downloadCanvas} className="download-button">💾 Download</button>
+            </div>
           </div>
         </div>
       </div>
