@@ -138,6 +138,30 @@ export default function FractalGenerator() {
       link.click();
     }
   };
+
+  // Handle canvas click - zoom in and center on clicked point
+  const handleCanvasClick = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Get click position relative to canvas
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Convert pixel coordinates to fractal coordinates
+    const scale = 4.0 / (zoom * Math.min(width, height));
+    const clickedX = centerX + (x - width / 2) * scale;
+    const clickedY = centerY + (y - height / 2) * scale;
+
+    // Double the zoom and set new center
+    setZoom(zoom * 2);
+    setCenterX(clickedX);
+    setCenterY(clickedY);
+
+    // Regenerate fractal with new parameters
+    setTimeout(() => generateFractal(), 50);
+  };
   
   return (
     <div className="container">
@@ -290,7 +314,14 @@ export default function FractalGenerator() {
             </div>
           )}
           
-          <canvas ref={canvasRef} id="fractal-canvas" width={width} height={height} />
+          <canvas 
+            ref={canvasRef} 
+            id="fractal-canvas" 
+            width={width} 
+            height={height}
+            onClick={handleCanvasClick}
+            style={{ cursor: 'pointer' }}
+          />
           
           <div className="fractal-info">
             <span className="generation-time">{generationTime}</span>

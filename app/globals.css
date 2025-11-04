@@ -199,14 +199,15 @@ header p {
     border: 3px solid #2c3e50;
     border-radius: 10px;
     box-shadow: 0 8px 25px rgba(0,0,0,.3);
-    cursor: crosshair;
+    cursor: zoom-in;
     max-width: 100%;
     height: auto;
     transition: transform .1s ease-out
 }
 
 #fractal-canvas:active {
-    transform: scale(.99)
+    transform: scale(.98);
+    cursor: zoom-in
 }
 
 .canvas-info {
