@@ -154,10 +154,10 @@ export default function FractalGenerator() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Convert pixel coordinates to fractal coordinates (halved offset)
+    // Convert pixel coordinates to fractal coordinates
     const scale = 4.0 / (zoom * Math.min(width, height));
-    const offsetX = (x - width / 2) * scale * 0.5;
-    const offsetY = (y - height / 2) * scale * 0.5;
+    const offsetX = (x - width / 2) * scale;
+    const offsetY = (y - height / 2) * scale;
     const clickedX = centerX + offsetX;
     const clickedY = centerY + offsetY;
 
@@ -177,6 +177,8 @@ export default function FractalGenerator() {
   };
 
   // Handle scroll wheel zoom
+  const wheelTimeoutRef = useRef(null);
+  
   const handleWheel = (e) => {
     e.preventDefault();
     const canvas = canvasRef.current;
@@ -186,8 +188,8 @@ export default function FractalGenerator() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    // Calculate zoom direction and factor
-    const zoomFactor = e.deltaY < 0 ? 1.2 : 0.8;
+    // Calculate zoom direction and factor (more responsive)
+    const zoomFactor = e.deltaY < 0 ? 1.3 : 0.77;
     const newZoom = zoom * zoomFactor;
 
     // Apply instant visual zoom
@@ -201,8 +203,8 @@ export default function FractalGenerator() {
 
     // Convert mouse position to fractal coordinates
     const scale = 4.0 / (zoom * Math.min(width, height));
-    const offsetX = (x - width / 2) * scale * 0.5;
-    const offsetY = (y - height / 2) * scale * 0.5;
+    const offsetX = (x - width / 2) * scale;
+    const offsetY = (y - height / 2) * scale;
     const mouseX = centerX + offsetX;
     const mouseY = centerY + offsetY;
 
@@ -214,11 +216,18 @@ export default function FractalGenerator() {
     setCenterX(newCenterX);
     setCenterY(newCenterY);
 
-    setTimeout(() => generateFractal(), 50);
+    // Debounce regeneration
+    if (wheelTimeoutRef.current) {
+      clearTimeout(wheelTimeoutRef.current);
+    }
+    wheelTimeoutRef.current = setTimeout(() => {
+      generateFractal();
+    }, 150);
   };
 
   // Handle touch events for pinch zoom
   const [touchDistance, setTouchDistance] = useState(null);
+  const touchTimeoutRef = useRef(null);
 
   const handleTouchStart = (e) => {
     if (e.touches.length === 2) {
@@ -238,6 +247,7 @@ export default function FractalGenerator() {
         e.touches[0].clientY - e.touches[1].clientY
       );
       
+      // More responsive zoom factor
       const zoomFactor = newDist / touchDistance;
       const newZoom = zoom * zoomFactor;
       
@@ -251,12 +261,23 @@ export default function FractalGenerator() {
       setZoom(newZoom);
       setTouchDistance(newDist);
       
-      setTimeout(() => generateFractal(), 50);
+      // Debounce regeneration
+      if (touchTimeoutRef.current) {
+        clearTimeout(touchTimeoutRef.current);
+      }
+      touchTimeoutRef.current = setTimeout(() => {
+        generateFractal();
+      }, 150);
     }
   };
 
   const handleTouchEnd = () => {
     setTouchDistance(null);
+    // Trigger final regeneration
+    if (touchTimeoutRef.current) {
+      clearTimeout(touchTimeoutRef.current);
+    }
+    generateFractal();
   };
 
   // Toggle fullscreen
