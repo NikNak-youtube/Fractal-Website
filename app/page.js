@@ -391,6 +391,22 @@ export default function FractalGenerator() {
     }
   };
 
+  // Track when dimensions change to trigger regeneration
+  const prevDimensionsRef = useRef({ width, height });
+  
+  useEffect(() => {
+    // Check if dimensions actually changed
+    if (prevDimensionsRef.current.width !== width || prevDimensionsRef.current.height !== height) {
+      // Dimensions changed, regenerate fractal
+      const timer = setTimeout(() => {
+        generateFractal();
+      }, 50);
+      
+      prevDimensionsRef.current = { width, height };
+      return () => clearTimeout(timer);
+    }
+  }, [width, height]);
+
   // Listen for fullscreen change and update dimensions
   useEffect(() => {
     const handleFullscreenChange = () => {
