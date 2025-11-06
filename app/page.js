@@ -180,23 +180,27 @@ export default function FractalGenerator() {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
+    
+    // Use actual canvas dimensions (important for fullscreen)
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
 
     // Calculate zoom factor
     const zoomFactor = 2;
     const newZoom = zoom * zoomFactor;
 
-    // Convert mouse position to fractal coordinates
-    const scale = 4.0 / (zoom * Math.min(width, height));
-    const fractalMouseX = centerX + (mouseX - width / 2) * scale;
-    const fractalMouseY = centerY + (mouseY - height / 2) * scale;
+    // Convert mouse position to fractal coordinates using actual canvas size
+    const scale = 4.0 / (zoom * Math.min(canvasWidth, canvasHeight));
+    const fractalMouseX = centerX + (mouseX - canvasWidth / 2) * scale;
+    const fractalMouseY = centerY + (mouseY - canvasHeight / 2) * scale;
 
     // Calculate new center to zoom towards clicked point
     const newCenterX = fractalMouseX - (fractalMouseX - centerX) * (zoom / newZoom);
     const newCenterY = fractalMouseY - (fractalMouseY - centerY) * (zoom / newZoom);
 
-    // Apply instant visual zoom
-    const translateX = (width / 2 - mouseX) * (zoomFactor - 1);
-    const translateY = (height / 2 - mouseY) * (zoomFactor - 1);
+    // Apply instant visual zoom relative to canvas dimensions
+    const translateX = (canvasWidth / 2 - mouseX) * (zoomFactor - 1);
+    const translateY = (canvasHeight / 2 - mouseY) * (zoomFactor - 1);
     setCanvasTransform({
       scale: zoomFactor,
       translateX,
@@ -224,15 +228,19 @@ export default function FractalGenerator() {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
+    
+    // Use actual canvas dimensions (important for fullscreen)
+    const canvasWidth = canvas.width;
+    const canvasHeight = canvas.height;
 
     // Calculate zoom direction and factor (more responsive)
     const zoomDelta = e.deltaY < 0 ? 1.15 : 0.87;
     const newZoom = zoom * zoomDelta;
 
-    // Convert mouse position to fractal coordinates
-    const scale = 4.0 / (zoom * Math.min(width, height));
-    const fractalMouseX = centerX + (mouseX - width / 2) * scale;
-    const fractalMouseY = centerY + (mouseY - height / 2) * scale;
+    // Convert mouse position to fractal coordinates using actual canvas size
+    const scale = 4.0 / (zoom * Math.min(canvasWidth, canvasHeight));
+    const fractalMouseX = centerX + (mouseX - canvasWidth / 2) * scale;
+    const fractalMouseY = centerY + (mouseY - canvasHeight / 2) * scale;
 
     // Calculate new center to zoom towards mouse position
     const newCenterX = fractalMouseX - (fractalMouseX - centerX) * (zoom / newZoom);
@@ -247,11 +255,11 @@ export default function FractalGenerator() {
     targetZoomRef.current = newZoom;
     targetCenterRef.current = { x: newCenterX, y: newCenterY };
 
-    // Apply smooth visual transform
+    // Apply smooth visual transform relative to canvas dimensions
     const visualScale = zoomDelta;
     currentVisualZoomRef.current *= visualScale;
-    const translateX = (width / 2 - mouseX) * (visualScale - 1);
-    const translateY = (height / 2 - mouseY) * (visualScale - 1);
+    const translateX = (canvasWidth / 2 - mouseX) * (visualScale - 1);
+    const translateY = (canvasHeight / 2 - mouseY) * (visualScale - 1);
     
     setCanvasTransform(prev => ({
       scale: prev.scale * visualScale,
@@ -302,6 +310,10 @@ export default function FractalGenerator() {
       
       const rect = canvas.getBoundingClientRect();
       
+      // Use actual canvas dimensions (important for fullscreen)
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      
       // Calculate current distance and center between fingers
       const newDist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
@@ -316,18 +328,18 @@ export default function FractalGenerator() {
       const zoomFactor = newDist / touchDistance;
       const newZoom = zoom * zoomFactor;
       
-      // Convert the CURRENT touch center to fractal coordinates
-      const scale = 4.0 / (zoom * Math.min(width, height));
-      const fractalTouchX = centerX + (currentTouchCenterX - width / 2) * scale;
-      const fractalTouchY = centerY + (currentTouchCenterY - height / 2) * scale;
+      // Convert the CURRENT touch center to fractal coordinates using actual canvas size
+      const scale = 4.0 / (zoom * Math.min(canvasWidth, canvasHeight));
+      const fractalTouchX = centerX + (currentTouchCenterX - canvasWidth / 2) * scale;
+      const fractalTouchY = centerY + (currentTouchCenterY - canvasHeight / 2) * scale;
       
       // Calculate new center to zoom towards the current touch point
       const newCenterX = fractalTouchX - (fractalTouchX - centerX) * (zoom / newZoom);
       const newCenterY = fractalTouchY - (fractalTouchY - centerY) * (zoom / newZoom);
       
-      // Apply instant visual zoom relative to current touch position
-      const translateX = (width / 2 - currentTouchCenterX) * (zoomFactor - 1);
-      const translateY = (height / 2 - currentTouchCenterY) * (zoomFactor - 1);
+      // Apply instant visual zoom relative to current touch position and canvas dimensions
+      const translateX = (canvasWidth / 2 - currentTouchCenterX) * (zoomFactor - 1);
+      const translateY = (canvasHeight / 2 - currentTouchCenterY) * (zoomFactor - 1);
       
       setCanvasTransform(prev => ({
         scale: prev.scale * zoomFactor,
