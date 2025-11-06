@@ -144,40 +144,49 @@ export default function FractalGenerator() {
     }
   };
 
-  // Handle canvas click - zoom in and center on clicked point
+  // Handle click to zoom
   const handleCanvasClick = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Get click position relative to canvas
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
 
-    // Convert pixel coordinates to fractal coordinates
+    // Calculate zoom factor
+    const zoomFactor = 2;
+    const newZoom = zoom * zoomFactor;
+
+    // Convert mouse position to fractal coordinates
     const scale = 4.0 / (zoom * Math.min(width, height));
-    const offsetX = (x - width / 2) * scale;
-    const offsetY = (y - height / 2) * scale;
-    const clickedX = centerX + offsetX;
-    const clickedY = centerY + offsetY;
+    const fractalMouseX = centerX + (mouseX - width / 2) * scale;
+    const fractalMouseY = centerY + (mouseY - height / 2) * scale;
+
+    // Calculate new center to zoom towards clicked point
+    const newCenterX = fractalMouseX - (fractalMouseX - centerX) * (zoom / newZoom);
+    const newCenterY = fractalMouseY - (fractalMouseY - centerY) * (zoom / newZoom);
 
     // Apply instant visual zoom
-    const zoomFactor = 2;
-    const translateX = (width / 2 - x) * (zoomFactor - 1);
-    const translateY = (height / 2 - y) * (zoomFactor - 1);
-    setCanvasTransform({ scale: zoomFactor, translateX, translateY });
+    const translateX = (width / 2 - mouseX) * (zoomFactor - 1);
+    const translateY = (height / 2 - mouseY) * (zoomFactor - 1);
+    setCanvasTransform({
+      scale: zoomFactor,
+      translateX,
+      translateY
+    });
 
-    // Double the zoom and set new center
-    setZoom(zoom * 2);
-    setCenterX(clickedX);
-    setCenterY(clickedY);
+    // Update state and regenerate
+    setZoom(newZoom);
+    setCenterX(newCenterX);
+    setCenterY(newCenterY);
 
-    // Regenerate fractal with new parameters
-    setTimeout(() => generateFractal(), 50);
-  };
-
-  // Handle scroll wheel zoom
+    setTimeout(() => generateFractal(), 0);
+  };  // Handle scroll wheel zoom with linear interpolation
   const wheelTimeoutRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const targetZoomRef = useRef(zoom);
+  const targetCenterRef = useRef({ x: centerX, y: centerY });
+  const currentVisualZoomRef = useRef(1);
   
   const handleWheel = (e) => {
     e.preventDefault();
@@ -185,80 +194,116 @@ export default function FractalGenerator() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
 
     // Calculate zoom direction and factor (more responsive)
-    const zoomFactor = e.deltaY < 0 ? 1.3 : 0.77;
-    const newZoom = zoom * zoomFactor;
-
-    // Apply instant visual zoom
-    const translateX = (width / 2 - x) * (zoomFactor - 1);
-    const translateY = (height / 2 - y) * (zoomFactor - 1);
-    setCanvasTransform(prev => ({
-      scale: prev.scale * zoomFactor,
-      translateX: prev.translateX + translateX,
-      translateY: prev.translateY + translateY
-    }));
+    const zoomDelta = e.deltaY < 0 ? 1.15 : 0.87;
+    const newZoom = zoom * zoomDelta;
 
     // Convert mouse position to fractal coordinates
     const scale = 4.0 / (zoom * Math.min(width, height));
-    const offsetX = (x - width / 2) * scale;
-    const offsetY = (y - height / 2) * scale;
-    const mouseX = centerX + offsetX;
-    const mouseY = centerY + offsetY;
+    const fractalMouseX = centerX + (mouseX - width / 2) * scale;
+    const fractalMouseY = centerY + (mouseY - height / 2) * scale;
 
-    // Adjust center to zoom towards mouse position
-    const newCenterX = mouseX - (mouseX - centerX) * (zoom / newZoom);
-    const newCenterY = mouseY - (mouseY - centerY) * (zoom / newZoom);
+    // Calculate new center to zoom towards mouse position
+    const newCenterX = fractalMouseX - (fractalMouseX - centerX) * (zoom / newZoom);
+    const newCenterY = fractalMouseY - (fractalMouseY - centerY) * (zoom / newZoom);
 
+    // Update state immediately
     setZoom(newZoom);
     setCenterX(newCenterX);
     setCenterY(newCenterY);
+
+    // Update targets for interpolation
+    targetZoomRef.current = newZoom;
+    targetCenterRef.current = { x: newCenterX, y: newCenterY };
+
+    // Apply smooth visual transform
+    const visualScale = zoomDelta;
+    currentVisualZoomRef.current *= visualScale;
+    const translateX = (width / 2 - mouseX) * (visualScale - 1);
+    const translateY = (height / 2 - mouseY) * (visualScale - 1);
+    
+    setCanvasTransform(prev => ({
+      scale: prev.scale * visualScale,
+      translateX: prev.translateX + translateX,
+      translateY: prev.translateY + translateY
+    }));
 
     // Debounce regeneration
     if (wheelTimeoutRef.current) {
       clearTimeout(wheelTimeoutRef.current);
     }
     wheelTimeoutRef.current = setTimeout(() => {
+      currentVisualZoomRef.current = 1;
       generateFractal();
-    }, 150);
+    }, 200);
   };
 
   // Handle touch events for pinch zoom
   const [touchDistance, setTouchDistance] = useState(null);
+  const [touchCenter, setTouchCenter] = useState(null);
   const touchTimeoutRef = useRef(null);
 
   const handleTouchStart = (e) => {
     if (e.touches.length === 2) {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const rect = canvas.getBoundingClientRect();
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
+      
+      // Calculate center point between fingers
+      const centerX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+      const centerY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+      
       setTouchDistance(dist);
+      setTouchCenter({ x: centerX, y: centerY });
     }
   };
 
   const handleTouchMove = (e) => {
-    if (e.touches.length === 2 && touchDistance) {
+    if (e.touches.length === 2 && touchDistance && touchCenter) {
       e.preventDefault();
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      
+      const rect = canvas.getBoundingClientRect();
       const newDist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
       
-      // More responsive zoom factor
+      // Calculate zoom factor
       const zoomFactor = newDist / touchDistance;
       const newZoom = zoom * zoomFactor;
       
+      // Convert touch center to fractal coordinates
+      const scale = 4.0 / (zoom * Math.min(width, height));
+      const fractalCenterX = centerX + (touchCenter.x - width / 2) * scale;
+      const fractalCenterY = centerY + (touchCenter.y - height / 2) * scale;
+      
+      // Calculate new center to zoom towards touch point
+      const newCenterX = fractalCenterX - (fractalCenterX - centerX) * (zoom / newZoom);
+      const newCenterY = fractalCenterY - (fractalCenterY - centerY) * (zoom / newZoom);
+      
       // Apply instant visual zoom
+      const translateX = (width / 2 - touchCenter.x) * (zoomFactor - 1);
+      const translateY = (height / 2 - touchCenter.y) * (zoomFactor - 1);
+      
       setCanvasTransform(prev => ({
         scale: prev.scale * zoomFactor,
-        translateX: prev.translateX,
-        translateY: prev.translateY
+        translateX: prev.translateX + translateX,
+        translateY: prev.translateY + translateY
       }));
       
       setZoom(newZoom);
+      setCenterX(newCenterX);
+      setCenterY(newCenterY);
       setTouchDistance(newDist);
       
       // Debounce regeneration
@@ -267,12 +312,13 @@ export default function FractalGenerator() {
       }
       touchTimeoutRef.current = setTimeout(() => {
         generateFractal();
-      }, 150);
+      }, 200);
     }
   };
 
   const handleTouchEnd = () => {
     setTouchDistance(null);
+    setTouchCenter(null);
     // Trigger final regeneration
     if (touchTimeoutRef.current) {
       clearTimeout(touchTimeoutRef.current);
