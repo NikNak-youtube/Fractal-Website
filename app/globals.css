@@ -282,6 +282,13 @@ header p {
     position: relative
 }
 
+.canvas-wrapper {
+    width: 100%;
+    height: auto;
+    margin: 0;
+    padding: 0;
+}
+
 #fractal-canvas {
     border: 3px solid #2c3e50;
     border-radius: 10px;
@@ -290,6 +297,8 @@ header p {
     max-width: 100%;
     height: auto;
     transition: none;
+    display: block;
+    margin: 0 auto;
 }
 
 #fractal-canvas:active {

@@ -683,7 +683,7 @@ export default function FractalGenerator() {
             className="canvas-wrapper"
             style={{
               width: '100%',
-              height: '100%',
+              height: isFullscreen ? '100%' : 'auto',
               overflow: 'hidden',
               position: 'relative',
               display: 'flex',
