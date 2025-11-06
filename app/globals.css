@@ -214,6 +214,67 @@ header p {
     font-style: italic;
 }
 
+.warning-text {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #856404;
+}
+
+.warning-text strong {
+    color: #856404;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.warning-text details {
+    margin-top: 8px;
+    cursor: pointer;
+}
+
+.warning-text summary {
+    font-weight: 600;
+    color: #856404;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.warning-text summary:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.warning-text ul {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.warning-text li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.warning-text ol {
+    margin-top: 5px;
+    margin-left: 20px;
+    font-size: 0.9em;
+}
+
+.warning-text ol li {
+    margin-bottom: 3px;
+}
+
+.warning-text code {
+    background: rgba(0,0,0,0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
 .fractal-display {
     display: flex;
     flex-direction: column;

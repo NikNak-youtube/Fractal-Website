@@ -301,27 +301,33 @@ export default function FractalGenerator() {
       if (!canvas) return;
       
       const rect = canvas.getBoundingClientRect();
+      
+      // Calculate current distance and center between fingers
       const newDist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
       
+      // Get current center point between fingers (it may have moved!)
+      const currentTouchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+      const currentTouchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+      
       // Calculate zoom factor
       const zoomFactor = newDist / touchDistance;
       const newZoom = zoom * zoomFactor;
       
-      // Convert touch center to fractal coordinates
+      // Convert the CURRENT touch center to fractal coordinates
       const scale = 4.0 / (zoom * Math.min(width, height));
-      const fractalCenterX = centerX + (touchCenter.x - width / 2) * scale;
-      const fractalCenterY = centerY + (touchCenter.y - height / 2) * scale;
+      const fractalTouchX = centerX + (currentTouchCenterX - width / 2) * scale;
+      const fractalTouchY = centerY + (currentTouchCenterY - height / 2) * scale;
       
-      // Calculate new center to zoom towards touch point
-      const newCenterX = fractalCenterX - (fractalCenterX - centerX) * (zoom / newZoom);
-      const newCenterY = fractalCenterY - (fractalCenterY - centerY) * (zoom / newZoom);
+      // Calculate new center to zoom towards the current touch point
+      const newCenterX = fractalTouchX - (fractalTouchX - centerX) * (zoom / newZoom);
+      const newCenterY = fractalTouchY - (fractalTouchY - centerY) * (zoom / newZoom);
       
-      // Apply instant visual zoom
-      const translateX = (width / 2 - touchCenter.x) * (zoomFactor - 1);
-      const translateY = (height / 2 - touchCenter.y) * (zoomFactor - 1);
+      // Apply instant visual zoom relative to current touch position
+      const translateX = (width / 2 - currentTouchCenterX) * (zoomFactor - 1);
+      const translateY = (height / 2 - currentTouchCenterY) * (zoomFactor - 1);
       
       setCanvasTransform(prev => ({
         scale: prev.scale * zoomFactor,
@@ -333,6 +339,9 @@ export default function FractalGenerator() {
       setCenterX(newCenterX);
       setCenterY(newCenterY);
       setTouchDistance(newDist);
+      
+      // Update the touch center for next frame
+      setTouchCenter({ x: currentTouchCenterX, y: currentTouchCenterY });
       
       // Debounce regeneration
       if (touchTimeoutRef.current) {
@@ -552,6 +561,35 @@ export default function FractalGenerator() {
                 <p className="info-text">
                   ✨ GPU acceleration provides 10-100x faster rendering!
                 </p>
+              )}
+              {!isWebGPUSupported() && (
+                <div className="warning-text">
+                  <p><strong>WebGPU Not Available</strong></p>
+                  <details>
+                    <summary>How to enable WebGPU</summary>
+                    <ul>
+                      <li><strong>Chromium/Chrome (Linux/Arch):</strong>
+                        <ol>
+                          <li>Go to <code>chrome://flags</code></li>
+                          <li>Enable <code>#enable-unsafe-webgpu</code></li>
+                          <li>Enable <code>#enable-vulkan</code></li>
+                          <li>Restart browser</li>
+                          <li>Install Vulkan: <code>sudo pacman -S vulkan-tools vulkan-icd-loader</code></li>
+                          <li>Install GPU drivers (vulkan-intel/vulkan-radeon/nvidia)</li>
+                        </ol>
+                      </li>
+                      <li><strong>Chrome (Android):</strong> Update to Chrome 121+</li>
+                      <li><strong>Safari (iOS):</strong> Update to iOS 18+ / Safari 18+</li>
+                      <li><strong>Chrome/Edge (Windows/Mac):</strong> Should work automatically (v113+)</li>
+                      <li><strong>Firefox:</strong> Enable <code>dom.webgpu.enabled</code> in <code>about:config</code></li>
+                    </ul>
+                    <p style={{marginTop: '10px', fontSize: '0.85em'}}>
+                      📖 See <a href="https://github.com/NikNak-youtube/Fractal-Website/blob/node.js/WEBGPU_SETUP.md" target="_blank" rel="noopener noreferrer" style={{color: '#856404', textDecoration: 'underline'}}>WEBGPU_SETUP.md</a> for detailed instructions.
+                      <br />
+                      Check browser console (F12) for more details.
+                    </p>
+                  </details>
+                </div>
               )}
             </div>
           )}

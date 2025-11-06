@@ -12,12 +12,26 @@ A beautiful web application for generating and exploring mathematical fractals w
 - **🎨 Multiple Fractal Types**: Generate Mandelbrot sets, Julia sets, and L-systems
 - **🔍 Interactive Controls**: Real-time zoom, pan, and parameter adjustment
 - **🌈 Color Schemes**: Choose from classic, fire, ocean, and grayscale palettes
-- **⚡ High Performance**: Efficient Node.js backend with Canvas API
+- **🚀 WebGPU Acceleration**: GPU-powered rendering for 10-100x faster generation
+- **⚡ High Performance**: Client-side rendering with automatic WebGPU/Canvas fallback
 - **📱 Responsive Design**: Works beautifully on desktop and mobile devices
 - **🎯 Preset Configurations**: Quick access to interesting fractal views
 - **💾 Download Support**: Save your favorite fractals as PNG images
-- **🖱️ Mouse Controls**: Click and drag to pan, scroll to zoom
+- **🖱️ Advanced Controls**: Click-to-zoom, scroll wheel zoom, pinch-to-zoom on mobile
 - **🌳 L-System Fractals**: Generate procedural tree-like and geometric patterns
+- **🌐 Fullscreen Mode**: Immersive fractal exploration
+
+## ⚡ WebGPU Acceleration
+
+**NEW!** This app now includes GPU-accelerated fractal generation using WebGPU! 
+
+- 🚀 **10-100x faster** rendering
+- 🖥️ Works on desktop and mobile
+- 🐧 **Linux users (Arch/Ubuntu/etc)**: See [WEBGPU_SETUP.md](./WEBGPU_SETUP.md) for setup instructions
+- 📱 **Mobile users**: Update to Chrome 121+ (Android) or iOS 18+ (iPhone/iPad)
+- ♻️ Automatic fallback to Canvas API if WebGPU unavailable
+
+👉 **[Complete WebGPU Setup Guide](./WEBGPU_SETUP.md)** - Step-by-step instructions for all platforms
 
 ## 🚀 Quick Start
 
@@ -26,6 +40,7 @@ A beautiful web application for generating and exploring mathematical fractals w
 - [Node.js](https://nodejs.org/) (version 18.0.0 or higher)
 - npm (comes with Node.js)
 - A modern web browser
+- (Optional) WebGPU support for GPU acceleration
 
 ### Installation & Running
 
@@ -130,26 +145,105 @@ The project includes:
   - `custom_axiom`, `custom_rules` - Custom L-system definition
   - `color_scheme` - Color palette selection
 
+## 🎮 WebGPU Acceleration
+
+This application uses **WebGPU** for GPU-accelerated fractal generation, providing massive performance improvements!
+
+### Browser Support
+
+| Browser | Platform | Support | Instructions |
+|---------|----------|---------|--------------|
+| **Chrome/Chromium** | Linux | ✅ Supported | Requires flags (see below) |
+| **Chrome** | Windows | ✅ Supported | Chrome 113+ |
+| **Chrome** | macOS | ✅ Supported | Chrome 113+ |
+| **Chrome** | Android | ✅ Supported | Chrome 121+ |
+| **Edge** | Windows | ✅ Supported | Edge 113+ |
+| **Safari** | iOS | ✅ Supported | iOS 18+ / Safari 18+ |
+| **Safari** | macOS | ✅ Supported | Safari 18+ |
+| **Firefox** | All | ⚠️ Experimental | Requires flag (see below) |
+
+### Enabling WebGPU on Chromium/Chrome (Linux/Arch)
+
+WebGPU requires manual enabling on Linux:
+
+1. **Open Chrome/Chromium Flags**:
+   - Navigate to: `chrome://flags`
+
+2. **Enable WebGPU**:
+   - Search for: `#enable-unsafe-webgpu`
+   - Set to: **Enabled**
+
+3. **Enable Vulkan** (required for Linux):
+   - Search for: `#enable-vulkan`
+   - Set to: **Enabled**
+
+4. **Restart your browser**
+
+5. **Verify Vulkan Support**:
+   ```bash
+   # Install Vulkan tools if needed
+   sudo pacman -S vulkan-tools  # Arch Linux
+   
+   # Check Vulkan support
+   vulkaninfo
+   ```
+
+6. **Install Vulkan Drivers** (if needed):
+   ```bash
+   # For NVIDIA
+   sudo pacman -S nvidia vulkan-icd-loader
+   
+   # For AMD
+   sudo pacman -S vulkan-radeon vulkan-icd-loader
+   
+   # For Intel
+   sudo pacman -S vulkan-intel vulkan-icd-loader
+   ```
+
+### Enabling WebGPU on Firefox
+
+1. Navigate to: `about:config`
+2. Search for: `dom.webgpu.enabled`
+3. Set to: `true`
+4. Restart Firefox
+
+### Mobile Support
+
+- **Android**: Update Chrome to version 121 or higher
+- **iOS**: Update to iOS 18 or higher with Safari 18+
+
+### Performance Benefits
+
+With WebGPU enabled:
+- **10-100x faster** fractal generation
+- **Real-time rendering** at high resolutions
+- **Smooth zooming** even at 1000+ iterations
+- **GPU-parallel computation** using compute shaders
+
+### Fallback
+
+If WebGPU is not available, the app automatically falls back to Canvas API (CPU rendering). You'll see a helpful message in the UI with instructions for enabling WebGPU.
+
 ## 🛠️ Development
 
 ### Project Structure
 
 ```text
 fractal-generator/
-├── app/                 # Next.js App Router
-│   ├── api/            # API Routes (serverless functions)
-│   │   ├── fractal/    
-│   │   │   └── route.js # Fractal generation endpoint
-│   │   └── health/
-│   │       └── route.js # Health check endpoint
-│   ├── layout.js       # Root layout with global CSS
-│   ├── page.js         # Main page (React component)
-│   └── globals.css     # Global styling
-├── lib/                # Utilities and helpers
-│   └── fractal-utils.js # Fractal generation logic
-├── public/             # Static assets (served at root)
-├── next.config.js      # Next.js configuration
-├── package.json        # Dependencies
+├── app/                    # Next.js App Router
+│   ├── layout.js          # Root layout with global CSS
+│   ├── page.js            # Main page (React component with all controls)
+│   └── globals.css        # Global styling
+├── lib/                   # Utilities and helpers
+│   ├── client-fractal.js  # Canvas API fractal generation (CPU)
+│   └── webgpu-fractal.js  # WebGPU fractal generation (GPU)
+├── static/                # Legacy static files
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
+├── next.config.js         # Next.js configuration
+├── package.json           # Dependencies
+├── vercel.json           # Vercel deployment config
 └── README.md
 ```
 
