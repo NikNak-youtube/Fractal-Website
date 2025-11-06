@@ -179,12 +179,19 @@ export default function FractalGenerator() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    let mouseX = e.clientX - rect.left;
+    let mouseY = e.clientY - rect.top;
     
     // Use actual canvas dimensions (important for fullscreen)
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
+    
+    // In fullscreen, canvas is scaled to 50%, so adjust mouse coordinates
+    if (isFullscreen) {
+      // Convert from display coordinates to canvas coordinates
+      mouseX = mouseX * 2;
+      mouseY = mouseY * 2;
+    }
 
     // Calculate zoom factor
     const zoomFactor = 2;
@@ -227,12 +234,18 @@ export default function FractalGenerator() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    let mouseX = e.clientX - rect.left;
+    let mouseY = e.clientY - rect.top;
     
     // Use actual canvas dimensions (important for fullscreen)
     const canvasWidth = canvas.width;
     const canvasHeight = canvas.height;
+    
+    // In fullscreen, canvas is scaled to 50%, so adjust mouse coordinates
+    if (isFullscreen) {
+      mouseX = mouseX * 2;
+      mouseY = mouseY * 2;
+    }
 
     // Calculate zoom direction and factor (more responsive)
     const zoomDelta = e.deltaY < 0 ? 1.15 : 0.87;
@@ -295,8 +308,14 @@ export default function FractalGenerator() {
       );
       
       // Calculate center point between fingers
-      const centerX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
-      const centerY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+      let centerX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+      let centerY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+      
+      // In fullscreen, canvas is scaled to 50%, so adjust touch coordinates
+      if (isFullscreen) {
+        centerX = centerX * 2;
+        centerY = centerY * 2;
+      }
       
       setTouchDistance(dist);
       setTouchCenter({ x: centerX, y: centerY });
@@ -322,8 +341,14 @@ export default function FractalGenerator() {
       );
       
       // Get current center point between fingers (it may have moved!)
-      const currentTouchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
-      const currentTouchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+      let currentTouchCenterX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+      let currentTouchCenterY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+      
+      // In fullscreen, canvas is scaled to 50%, so adjust touch coordinates
+      if (isFullscreen) {
+        currentTouchCenterX = currentTouchCenterX * 2;
+        currentTouchCenterY = currentTouchCenterY * 2;
+      }
       
       // Calculate zoom factor
       const zoomFactor = newDist / touchDistance;
