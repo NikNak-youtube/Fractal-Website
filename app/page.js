@@ -427,9 +427,9 @@ export default function FractalGenerator() {
       setIsFullscreen(isNowFullscreen);
       
       if (isNowFullscreen) {
-        // Update to screen dimensions
-        setWidth(window.screen.width);
-        setHeight(window.screen.height);
+        // Render at 2x resolution for smooth panning buffer
+        setWidth(window.screen.width * 2);
+        setHeight(window.screen.height * 2);
       } else {
         // Revert to default dimensions
         setWidth(800);
@@ -682,8 +682,11 @@ export default function FractalGenerator() {
                 transform: `translate(${canvasTransform.translateX}px, ${canvasTransform.translateY}px) scale(${canvasTransform.scale})`,
                 transformOrigin: 'center center',
                 transition: 'none',
-                maxWidth: '100%',
-                maxHeight: '100%',
+                // In fullscreen, scale down 2x canvas to fit viewport (gives panning buffer)
+                width: isFullscreen ? '50%' : 'auto',
+                height: isFullscreen ? '50%' : 'auto',
+                maxWidth: isFullscreen ? 'none' : '100%',
+                maxHeight: isFullscreen ? 'none' : '100%',
                 objectFit: 'contain'
               }}
             />
