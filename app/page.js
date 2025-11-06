@@ -33,6 +33,7 @@ export default function FractalGenerator() {
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
   
   const canvasRef = useRef(null);
+  const canvasWrapperRef = useRef(null);
   const [currentImage, setCurrentImage] = useState(null);
   const [canvasTransform, setCanvasTransform] = useState({ scale: 1, translateX: 0, translateY: 0 });
   const [useWebGPU, setUseWebGPU] = useState(false);
@@ -379,16 +380,16 @@ export default function FractalGenerator() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    const wrapper = canvasWrapperRef.current;
+    if (!wrapper) return;
 
     if (!isFullscreen) {
-      if (canvas.requestFullscreen) {
-        canvas.requestFullscreen();
-      } else if (canvas.webkitRequestFullscreen) {
-        canvas.webkitRequestFullscreen();
-      } else if (canvas.msRequestFullscreen) {
-        canvas.msRequestFullscreen();
+      if (wrapper.requestFullscreen) {
+        wrapper.requestFullscreen();
+      } else if (wrapper.webkitRequestFullscreen) {
+        wrapper.webkitRequestFullscreen();
+      } else if (wrapper.msRequestFullscreen) {
+        wrapper.msRequestFullscreen();
       }
       setIsFullscreen(true);
     } else {
@@ -652,24 +653,41 @@ export default function FractalGenerator() {
             </div>
           )}
           
-          <canvas 
-            ref={canvasRef} 
-            id="fractal-canvas" 
-            width={width} 
-            height={height}
-            onClick={handleCanvasClick}
-            onWheel={handleWheel}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-            style={{ 
-              cursor: 'pointer', 
-              touchAction: 'none',
-              transform: `translate(${canvasTransform.translateX}px, ${canvasTransform.translateY}px) scale(${canvasTransform.scale})`,
-              transformOrigin: 'center center',
-              transition: 'none'
+          <div 
+            ref={canvasWrapperRef}
+            className="canvas-wrapper"
+            style={{
+              width: '100%',
+              height: '100%',
+              overflow: 'hidden',
+              position: 'relative',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
             }}
-          />
+          >
+            <canvas 
+              ref={canvasRef} 
+              id="fractal-canvas" 
+              width={width} 
+              height={height}
+              onClick={handleCanvasClick}
+              onWheel={handleWheel}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+              style={{ 
+                cursor: 'pointer', 
+                touchAction: 'none',
+                transform: `translate(${canvasTransform.translateX}px, ${canvasTransform.translateY}px) scale(${canvasTransform.scale})`,
+                transformOrigin: 'center center',
+                transition: 'none',
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain'
+              }}
+            />
+          </div>
           
           <div className="fractal-info">
             <span className="generation-time">{generationTime}</span>

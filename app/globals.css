@@ -289,12 +289,49 @@ header p {
     cursor: zoom-in;
     max-width: 100%;
     height: auto;
-    transition: transform .1s ease-out
+    transition: none;
 }
 
 #fractal-canvas:active {
-    transform: scale(.98);
-    cursor: zoom-in
+    cursor: zoom-in;
+}
+
+/* Canvas wrapper for proper fullscreen transform support */
+.canvas-wrapper:fullscreen {
+    background: #000;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.canvas-wrapper:fullscreen #fractal-canvas {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+/* Webkit fullscreen support */
+.canvas-wrapper:-webkit-full-screen {
+    background: #000;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.canvas-wrapper:-webkit-full-screen #fractal-canvas {
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: 100vw;
+    max-height: 100vh;
 }
 
 .canvas-info {
