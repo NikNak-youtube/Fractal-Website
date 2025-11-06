@@ -312,11 +312,11 @@ header p {
     border: none;
     border-radius: 0;
     box-shadow: none;
-    /* Canvas is rendered at 2x resolution */
-    /* Displayed at 50% size to fit viewport */
-    /* This gives a buffer zone for smooth panning */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
+    /* Canvas is rendered at 2x resolution (e.g., 3840x2160) */
+    /* Scaled to 50% (e.g., 1920x1080 apparent size) */
+    /* This maintains same zoom level but provides panning buffer */
+    image-rendering: auto;
+    image-rendering: high-quality;
     position: absolute;
 }
 
@@ -336,8 +336,8 @@ header p {
     border: none;
     border-radius: 0;
     box-shadow: none;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
+    image-rendering: auto;
+    image-rendering: high-quality;
     position: absolute;
 }
 

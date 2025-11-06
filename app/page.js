@@ -679,12 +679,12 @@ export default function FractalGenerator() {
               style={{ 
                 cursor: 'pointer', 
                 touchAction: 'none',
-                transform: `translate(${canvasTransform.translateX}px, ${canvasTransform.translateY}px) scale(${canvasTransform.scale})`,
+                // In fullscreen: 2x canvas scaled to 50% = same apparent zoom with buffer
+                transform: isFullscreen 
+                  ? `scale(0.5) translate(${canvasTransform.translateX}px, ${canvasTransform.translateY}px) scale(${canvasTransform.scale})`
+                  : `translate(${canvasTransform.translateX}px, ${canvasTransform.translateY}px) scale(${canvasTransform.scale})`,
                 transformOrigin: 'center center',
                 transition: 'none',
-                // In fullscreen, scale down 2x canvas to fit viewport (gives panning buffer)
-                width: isFullscreen ? '50%' : 'auto',
-                height: isFullscreen ? '50%' : 'auto',
                 maxWidth: isFullscreen ? 'none' : '100%',
                 maxHeight: isFullscreen ? 'none' : '100%',
                 objectFit: 'contain'
