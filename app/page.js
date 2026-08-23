@@ -13,11 +13,17 @@ export default function FractalGenerator() {
   const [zoom, setZoom] = useState(1);
   const [centerX, setCenterX] = useState(0);
   const [centerY, setCenterY] = useState(0);
+  const [precisionMode, setPrecisionMode] = useState('number');
+  const [zoomString, setZoomString] = useState('1');
+  const [centerXString, setCenterXString] = useState('0');
+  const [centerYString, setCenterYString] = useState('0');
   const [colorScheme, setColorScheme] = useState('classic');
   
   // Julia set parameters
   const [juliaCReal, setJuliaCReal] = useState(-0.7);
   const [juliaCImag, setJuliaCImag] = useState(0.27015);
+  const [juliaCRealString, setJuliaCRealString] = useState('-0.7');
+  const [juliaCImagString, setJuliaCImagString] = useState('0.27015');
   
   // L-system parameters
   const [lsystemPreset, setLsystemPreset] = useState('tree');
@@ -38,6 +44,48 @@ export default function FractalGenerator() {
   const [canvasTransform, setCanvasTransform] = useState({ scale: 1, translateX: 0, translateY: 0 });
   const [useWebGPU, setUseWebGPU] = useState(false);
   const [webGPUInitialized, setWebGPUInitialized] = useState(false);
+
+  const setViewValues = (nextZoom, nextCenterX, nextCenterY) => {
+    setZoom(nextZoom);
+    setCenterX(nextCenterX);
+    setCenterY(nextCenterY);
+    setZoomString(String(nextZoom));
+    setCenterXString(String(nextCenterX));
+    setCenterYString(String(nextCenterY));
+  };
+
+  const setJuliaValues = (nextReal, nextImag) => {
+    setJuliaCReal(nextReal);
+    setJuliaCImag(nextImag);
+    setJuliaCRealString(String(nextReal));
+    setJuliaCImagString(String(nextImag));
+  };
+
+  const switchPrecisionMode = (mode) => {
+    if (mode === 'big') {
+      setZoomString(String(zoom));
+      setCenterXString(String(centerX));
+      setCenterYString(String(centerY));
+      setJuliaCRealString(String(juliaCReal));
+      setJuliaCImagString(String(juliaCImag));
+      setPrecisionMode('big');
+      return;
+    }
+
+    const parsedZoom = Number(zoomString);
+    const parsedCenterX = Number(centerXString);
+    const parsedCenterY = Number(centerYString);
+    const parsedJuliaCReal = Number(juliaCRealString);
+    const parsedJuliaCImag = Number(juliaCImagString);
+
+    if (Number.isFinite(parsedZoom) && parsedZoom > 0) setZoom(parsedZoom);
+    if (Number.isFinite(parsedCenterX)) setCenterX(parsedCenterX);
+    if (Number.isFinite(parsedCenterY)) setCenterY(parsedCenterY);
+    if (Number.isFinite(parsedJuliaCReal)) setJuliaCReal(parsedJuliaCReal);
+    if (Number.isFinite(parsedJuliaCImag)) setJuliaCImag(parsedJuliaCImag);
+
+    setPrecisionMode('number');
+  };
   
   // Initialize WebGPU on mount
   useEffect(() => {
@@ -68,30 +116,32 @@ export default function FractalGenerator() {
       canvas.width = width;
       canvas.height = height;
 
+      const useBigMath = precisionMode === 'big' && fractalType !== 'lsystem';
       const params = {
         width,
         height,
-        zoom,
-        centerX,
-        centerY,
+        zoom: useBigMath ? zoomString : zoom,
+        centerX: useBigMath ? centerXString : centerX,
+        centerY: useBigMath ? centerYString : centerY,
         maxIter,
         colorScheme,
-        juliaCReal,
-        juliaCImag,
+        juliaCReal: useBigMath ? juliaCRealString : juliaCReal,
+        juliaCImag: useBigMath ? juliaCImagString : juliaCImag,
         lsystemPreset,
         lsystemIterations,
-        lsystemAngle
+        lsystemAngle,
+        precisionMode: useBigMath ? 'big' : 'number'
       };
 
       // Generate based on fractal type
       if (fractalType === 'mandelbrot') {
-        if (useWebGPU && isWebGPUSupported()) {
+        if (!useBigMath && useWebGPU && isWebGPUSupported()) {
           await generateMandelbrotGPU(canvas, params);
         } else {
           generateMandelbrot(canvas, params);
         }
       } else if (fractalType === 'julia') {
-        if (useWebGPU && isWebGPUSupported()) {
+        if (!useBigMath && useWebGPU && isWebGPUSupported()) {
           await generateJuliaGPU(canvas, params);
         } else {
           generateJulia(canvas, params);
@@ -103,7 +153,9 @@ export default function FractalGenerator() {
 
       const endTime = performance.now();
       const time = ((endTime - startTime) / 1000).toFixed(2);
-      const method = (useWebGPU && isWebGPUSupported() && fractalType !== 'lsystem') ? ' (WebGPU)' : ' (Canvas)';
+      const method = useBigMath
+        ? ' (Big Number CPU)'
+        : ((useWebGPU && isWebGPUSupported() && fractalType !== 'lsystem') ? ' (WebGPU)' : ' (Canvas)');
       setGenerationTime(`Generated in ${time}s${method}`);
       setLoading(false);
       
@@ -125,9 +177,7 @@ export default function FractalGenerator() {
   
   // Reset view
   const resetView = () => {
-    setZoom(1);
-    setCenterX(0);
-    setCenterY(0);
+    setViewValues(1, 0, 0);
     generateFractal();
   };
   
@@ -148,13 +198,12 @@ export default function FractalGenerator() {
     if (!config) return;
     
     setFractalType(config.fractalType);
-    setZoom(config.zoom);
-    setCenterX(config.centerX);
-    setCenterY(config.centerY);
+    setViewValues(config.zoom, config.centerX, config.centerY);
     setColorScheme(config.colorScheme);
     
-    if (config.juliaCReal !== undefined) setJuliaCReal(config.juliaCReal);
-    if (config.juliaCImag !== undefined) setJuliaCImag(config.juliaCImag);
+    if (config.juliaCReal !== undefined && config.juliaCImag !== undefined) {
+      setJuliaValues(config.juliaCReal, config.juliaCImag);
+    }
     if (config.lsystemPreset !== undefined) setLsystemPreset(config.lsystemPreset);
     if (config.lsystemIterations !== undefined) setLsystemIterations(config.lsystemIterations);
     if (config.lsystemAngle !== undefined) setLsystemAngle(config.lsystemAngle);
@@ -175,6 +224,8 @@ export default function FractalGenerator() {
 
   // Handle click to zoom
   const handleCanvasClick = (e) => {
+    if (precisionMode === 'big') return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -229,6 +280,8 @@ export default function FractalGenerator() {
   const currentVisualZoomRef = useRef(1);
   
   const handleWheel = (e) => {
+    if (precisionMode === 'big') return;
+
     e.preventDefault();
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -297,6 +350,8 @@ export default function FractalGenerator() {
   const touchTimeoutRef = useRef(null);
 
   const handleTouchStart = (e) => {
+    if (precisionMode === 'big') return;
+
     if (e.touches.length === 2) {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -323,6 +378,8 @@ export default function FractalGenerator() {
   };
 
   const handleTouchMove = (e) => {
+    if (precisionMode === 'big') return;
+
     if (e.touches.length === 2 && touchDistance && touchCenter) {
       e.preventDefault();
       const canvas = canvasRef.current;
@@ -392,6 +449,8 @@ export default function FractalGenerator() {
   };
 
   const handleTouchEnd = () => {
+    if (precisionMode === 'big') return;
+
     setTouchDistance(null);
     setTouchCenter(null);
     // Trigger final regeneration
@@ -512,18 +571,80 @@ export default function FractalGenerator() {
           {/* View Controls */}
           <div className="control-group">
             <h3>View Controls</h3>
+            {precisionMode === 'number' ? (
+              <>
+                <label>
+                  Zoom:
+                  <input
+                    type="range"
+                    value={zoom}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setZoom(value);
+                      setZoomString(String(value));
+                    }}
+                    min="0.1"
+                    max="100"
+                    step="0.1"
+                  />
+                  <span>{zoom.toFixed(1)}</span>
+                </label>
+                <label>
+                  Center X:
+                  <input
+                    type="number"
+                    value={centerX}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setCenterX(value);
+                      setCenterXString(String(value));
+                    }}
+                    step="0.01"
+                  />
+                </label>
+                <label>
+                  Center Y:
+                  <input
+                    type="number"
+                    value={centerY}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setCenterY(value);
+                      setCenterYString(String(value));
+                    }}
+                    step="0.01"
+                  />
+                </label>
+              </>
+            ) : (
+              <>
+                <label>
+                  Zoom (string):
+                  <input type="text" value={zoomString} onChange={(e) => setZoomString(e.target.value)} placeholder="e.g. 1000000" />
+                </label>
+                <label>
+                  Center X (string):
+                  <input type="text" value={centerXString} onChange={(e) => setCenterXString(e.target.value)} placeholder="e.g. -0.743643887037151" />
+                </label>
+                <label>
+                  Center Y (string):
+                  <input type="text" value={centerYString} onChange={(e) => setCenterYString(e.target.value)} placeholder="e.g. 0.13182590420533" />
+                </label>
+                <p className="info-text">
+                  Big Number mode uses string inputs and arbitrary precision math. Gesture zoom/pan is disabled in this mode.
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="control-group">
+            <h3>Precision</h3>
             <label>
-              Zoom:
-              <input type="range" value={zoom} onChange={(e) => setZoom(Number(e.target.value))} min="0.1" max="100" step="0.1" />
-              <span>{zoom.toFixed(1)}</span>
-            </label>
-            <label>
-              Center X:
-              <input type="number" value={centerX} onChange={(e) => setCenterX(Number(e.target.value))} step="0.01" />
-            </label>
-            <label>
-              Center Y:
-              <input type="number" value={centerY} onChange={(e) => setCenterY(Number(e.target.value))} step="0.01" />
+              Calculation Mode:
+              <select value={precisionMode} onChange={(e) => switchPrecisionMode(e.target.value)}>
+                <option value="number">Standard Number (fast)</option>
+                <option value="big">Big Number String Mode (high precision)</option>
+              </select>
             </label>
           </div>
           
@@ -533,11 +654,37 @@ export default function FractalGenerator() {
               <h3>Julia Set Parameters</h3>
               <label>
                 C Real:
-                <input type="number" value={juliaCReal} onChange={(e) => setJuliaCReal(Number(e.target.value))} step="0.01" />
+                {precisionMode === 'big' ? (
+                  <input type="text" value={juliaCRealString} onChange={(e) => setJuliaCRealString(e.target.value)} placeholder="e.g. -0.8" />
+                ) : (
+                  <input
+                    type="number"
+                    value={juliaCReal}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setJuliaCReal(value);
+                      setJuliaCRealString(String(value));
+                    }}
+                    step="0.01"
+                  />
+                )}
               </label>
               <label>
                 C Imaginary:
-                <input type="number" value={juliaCImag} onChange={(e) => setJuliaCImag(Number(e.target.value))} step="0.01" />
+                {precisionMode === 'big' ? (
+                  <input type="text" value={juliaCImagString} onChange={(e) => setJuliaCImagString(e.target.value)} placeholder="e.g. 0.156" />
+                ) : (
+                  <input
+                    type="number"
+                    value={juliaCImag}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      setJuliaCImag(value);
+                      setJuliaCImagString(String(value));
+                    }}
+                    step="0.01"
+                  />
+                )}
               </label>
             </div>
           )}
